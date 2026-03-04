@@ -8,18 +8,18 @@ Status: ready
 
 ## Categories
 
-- `CardholderAccount`
-- `CardAuthHold`
-- `MerchantSettlement`
-- `CardFeeIncome`
-- `ChargebackReserve`
+- `CardholderAccount` — счёт держателя карты.
+- `CardAuthHold` — счёт авторизационных hold по картам.
+- `MerchantSettlement` — счёт расчётов с мерчантами.
+- `CardFeeIncome` — счёт дохода от карточных комиссий.
+- `ChargebackReserve` — резерв под chargeback.
 
 ## Policies
 
-- `CardholderAccount -> CardAuthHold` (`allow_reverse = false`)
-- `CardAuthHold -> MerchantSettlement` (`allow_reverse = false`)
-- `CardholderAccount -> CardFeeIncome` (`allow_reverse = false`)
-- `CardAuthHold -> ChargebackReserve` (`allow_reverse = false`)
+- `CardholderAccount -> CardAuthHold` (`невозвращаемые`) — разрешён перевод из категории `CardholderAccount` в категорию `CardAuthHold` в рамках сценария.
+- `CardAuthHold -> MerchantSettlement` (`невозвращаемые`) — разрешён перевод из категории `CardAuthHold` в категорию `MerchantSettlement` в рамках сценария.
+- `CardholderAccount -> CardFeeIncome` (`невозвращаемые`) — разрешён перевод из категории `CardholderAccount` в категорию `CardFeeIncome` в рамках сценария.
+- `CardAuthHold -> ChargebackReserve` (`невозвращаемые`) — разрешён перевод из категории `CardAuthHold` в категорию `ChargebackReserve` в рамках сценария.
 
 ## Typical Operations
 

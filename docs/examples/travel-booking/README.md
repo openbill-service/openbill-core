@@ -8,16 +8,16 @@ Status: ready
 
 ## Categories
 
-- `Traveler`
-- `BookingEscrow`
-- `SupplierPayout`
-- `OTAFee`
+- `Traveler` — счёт путешественника (плательщика).
+- `BookingEscrow` — эскроу-счёт бронирований.
+- `SupplierPayout` — счёт выплат поставщику.
+- `OTAFee` — счёт комиссии OTA.
 
 ## Policies
 
-- `Traveler -> BookingEscrow` (`allow_reverse = true`)
-- `BookingEscrow -> SupplierPayout` (`allow_reverse = false`)
-- `BookingEscrow -> OTAFee` (`allow_reverse = false`)
+- `Traveler -> BookingEscrow` (`возвращаемые`) — разрешён перевод из категории `Traveler` в категорию `BookingEscrow` в рамках сценария.
+- `BookingEscrow -> SupplierPayout` (`невозвращаемые`) — разрешён перевод из категории `BookingEscrow` в категорию `SupplierPayout` в рамках сценария.
+- `BookingEscrow -> OTAFee` (`невозвращаемые`) — разрешён перевод из категории `BookingEscrow` в категорию `OTAFee` в рамках сценария.
 
 ## Typical Operations
 

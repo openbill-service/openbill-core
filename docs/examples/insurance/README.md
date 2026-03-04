@@ -8,16 +8,16 @@ Status: ready
 
 ## Categories
 
-- `PremiumInflow`
-- `InsuranceReserve`
-- `ClaimsPayout`
-- `InsuranceFee`
+- `PremiumInflow` — счёт поступления страховых премий.
+- `InsuranceReserve` — страховой резерв.
+- `ClaimsPayout` — счёт страховых выплат.
+- `InsuranceFee` — счёт страховой комиссии.
 
 ## Policies
 
-- `PremiumInflow -> InsuranceReserve` (`allow_reverse = false`)
-- `InsuranceReserve -> ClaimsPayout` (`allow_reverse = false`)
-- `InsuranceReserve -> InsuranceFee` (`allow_reverse = false`)
+- `PremiumInflow -> InsuranceReserve` (`невозвращаемые`) — разрешён перевод из категории `PremiumInflow` в категорию `InsuranceReserve` в рамках сценария.
+- `InsuranceReserve -> ClaimsPayout` (`невозвращаемые`) — разрешён перевод из категории `InsuranceReserve` в категорию `ClaimsPayout` в рамках сценария.
+- `InsuranceReserve -> InsuranceFee` (`невозвращаемые`) — разрешён перевод из категории `InsuranceReserve` в категорию `InsuranceFee` в рамках сценария.
 
 ## Typical Operations
 

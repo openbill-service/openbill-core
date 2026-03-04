@@ -8,16 +8,16 @@ Status: ready
 
 ## Categories
 
-- `Revenue`
-- `ReferralAccrual`
-- `PartnerWallet`
-- `ReferralReversal`
+- `Revenue` — счёт выручки.
+- `ReferralAccrual` — счёт начислений по реферальной программе.
+- `PartnerWallet` — кошелёк партнёра.
+- `ReferralReversal` — счёт реверсов/корректировок рефералок.
 
 ## Policies
 
-- `Revenue -> ReferralAccrual` (`allow_reverse = false`)
-- `ReferralAccrual -> PartnerWallet` (`allow_reverse = false`)
-- `ReferralAccrual -> ReferralReversal` (`allow_reverse = false`)
+- `Revenue -> ReferralAccrual` (`невозвращаемые`) — разрешён перевод из категории `Revenue` в категорию `ReferralAccrual` в рамках сценария.
+- `ReferralAccrual -> PartnerWallet` (`невозвращаемые`) — разрешён перевод из категории `ReferralAccrual` в категорию `PartnerWallet` в рамках сценария.
+- `ReferralAccrual -> ReferralReversal` (`невозвращаемые`) — разрешён перевод из категории `ReferralAccrual` в категорию `ReferralReversal` в рамках сценария.
 
 ## Typical Operations
 

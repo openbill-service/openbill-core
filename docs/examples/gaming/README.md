@@ -8,18 +8,18 @@ Status: ready
 
 ## Categories
 
-- `TopupSource`
-- `PlayerWallet`
-- `RewardPool`
-- `GameSink`
-- `PlatformFee`
+- `TopupSource` — внешний источник пополнения.
+- `PlayerWallet` — кошелёк игрока.
+- `RewardPool` — пул вознаграждений.
+- `GameSink` — счёт списаний за внутриигровые траты.
+- `PlatformFee` — счёт комиссии платформы.
 
 ## Policies
 
-- `TopupSource -> PlayerWallet` (`allow_reverse = true`)
-- `RewardPool -> PlayerWallet` (`allow_reverse = false`)
-- `PlayerWallet -> GameSink` (`allow_reverse = false`)
-- `PlayerWallet -> PlatformFee` (`allow_reverse = false`)
+- `TopupSource -> PlayerWallet` (`возвращаемые`) — разрешён перевод из категории `TopupSource` в категорию `PlayerWallet` в рамках сценария.
+- `RewardPool -> PlayerWallet` (`невозвращаемые`) — разрешён перевод из категории `RewardPool` в категорию `PlayerWallet` в рамках сценария.
+- `PlayerWallet -> GameSink` (`невозвращаемые`) — разрешён перевод из категории `PlayerWallet` в категорию `GameSink` в рамках сценария.
+- `PlayerWallet -> PlatformFee` (`невозвращаемые`) — разрешён перевод из категории `PlayerWallet` в категорию `PlatformFee` в рамках сценария.
 
 ## Typical Operations
 

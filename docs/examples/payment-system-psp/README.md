@@ -9,18 +9,18 @@ Status: ready
 
 ## Categories
 
-- `PayerSource`
-- `PSPClearing`
-- `MerchantSettlement`
-- `PSPFee`
-- `ChargebackReserve`
+- `PayerSource` — счёт источника платежа плательщика.
+- `PSPClearing` — клиринговый счёт PSP.
+- `MerchantSettlement` — счёт расчётов с мерчантами.
+- `PSPFee` — счёт комиссии PSP.
+- `ChargebackReserve` — резерв под chargeback.
 
 ## Policies
 
-- `PayerSource -> PSPClearing` (`allow_reverse = true`)
-- `PSPClearing -> MerchantSettlement` (`allow_reverse = false`)
-- `PSPClearing -> PSPFee` (`allow_reverse = false`)
-- `PSPClearing -> ChargebackReserve` (`allow_reverse = false`)
+- `PayerSource -> PSPClearing` (`возвращаемые`) — разрешён перевод из категории `PayerSource` в категорию `PSPClearing` в рамках сценария.
+- `PSPClearing -> MerchantSettlement` (`невозвращаемые`) — разрешён перевод из категории `PSPClearing` в категорию `MerchantSettlement` в рамках сценария.
+- `PSPClearing -> PSPFee` (`невозвращаемые`) — разрешён перевод из категории `PSPClearing` в категорию `PSPFee` в рамках сценария.
+- `PSPClearing -> ChargebackReserve` (`невозвращаемые`) — разрешён перевод из категории `PSPClearing` в категорию `ChargebackReserve` в рамках сценария.
 
 ## Typical Operations
 

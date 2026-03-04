@@ -8,16 +8,16 @@ Status: ready
 
 ## Categories
 
-- `SenderSource`
-- `RemitEscrow`
-- `RecipientPayout`
-- `FXFee`
+- `SenderSource` — счёт отправителя.
+- `RemitEscrow` — эскроу-счёт ремиттанса.
+- `RecipientPayout` — счёт выплаты получателю.
+- `FXFee` — счёт FX-комиссии.
 
 ## Policies
 
-- `SenderSource -> RemitEscrow` (`allow_reverse = true`)
-- `RemitEscrow -> RecipientPayout` (`allow_reverse = false`)
-- `RemitEscrow -> FXFee` (`allow_reverse = false`)
+- `SenderSource -> RemitEscrow` (`возвращаемые`) — разрешён перевод из категории `SenderSource` в категорию `RemitEscrow` в рамках сценария.
+- `RemitEscrow -> RecipientPayout` (`невозвращаемые`) — разрешён перевод из категории `RemitEscrow` в категорию `RecipientPayout` в рамках сценария.
+- `RemitEscrow -> FXFee` (`невозвращаемые`) — разрешён перевод из категории `RemitEscrow` в категорию `FXFee` в рамках сценария.
 
 ## Typical Operations
 

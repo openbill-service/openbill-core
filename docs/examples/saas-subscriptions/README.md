@@ -8,16 +8,16 @@ Status: ready
 
 ## Categories
 
-- `Customer`
-- `Revenue`
-- `Tax`
-- `RefundReserve`
+- `Customer` — счёт клиента (источник оплаты).
+- `Revenue` — счёт выручки.
+- `Tax` — налоговый счёт.
+- `RefundReserve` — резерв под возвраты.
 
 ## Policies
 
-- `Customer -> Revenue` (`allow_reverse = true`)
-- `Revenue -> Tax` (`allow_reverse = false`)
-- `Revenue -> RefundReserve` (`allow_reverse = false`)
+- `Customer -> Revenue` (`возвращаемые`) — разрешён перевод из категории `Customer` в категорию `Revenue` в рамках сценария.
+- `Revenue -> Tax` (`невозвращаемые`) — разрешён перевод из категории `Revenue` в категорию `Tax` в рамках сценария.
+- `Revenue -> RefundReserve` (`невозвращаемые`) — разрешён перевод из категории `Revenue` в категорию `RefundReserve` в рамках сценария.
 
 ## Typical Operations
 
