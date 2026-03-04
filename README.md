@@ -6,9 +6,7 @@
 
 Создан по принципу: "Меньше функций - больше надежности".
 
-Этот проект имеет статус "экспериментальный", однако с 2015-го года используется в
-нескольких приложениях на PHP, Ruby, GoLang. С тех пор багов не найдено. Скорее
-всего, при следующем причесывании документации, получит статус "стабильный".
+С 2015-го года используется в нескольких приложениях на PHP, Ruby, GoLang. За это время багов не найдено.
 
 Чем обусловлена надежность данного решения:
 
@@ -43,7 +41,7 @@
 ## Финансовые
 
 * Таблица `OPENBILL_ACCOUNTS` - счёт. Имеет уникальный bigint-идентификатор. Несёт информацию о состоянии счёта (балансе), валюте (поля `amount_value` и `amount_currency`).
-* Таблица `OPENBILL_TRANSFERS` - операция перемещения средств между счетами. Имеет уникальный идентификатор, идентификаторы входящего и исходящего счёта, сумму транзакции, описание.
+* Таблица `OPENBILL_TRANSFERS` - операция перемещения средств между счетами. Имеет уникальный идентификатор, идентификаторы входящего и исходящего счёта, сумму, описание. Дополнительные поля: `meta` (JSONB) для произвольных данных, `billing_date` для внешней даты операции.
 * Таблица `OPENBILL_HOLDS` - операция блокировки средств на счёте. Имеет уникальный идентификатор, идентификатор счета, сумму блокировки, описание. Для разблокировки средств нужно добавить новую запись с отрицательной суммой, а в поле `hold_key` внести идентификатор операции блокировки.
 
 ## Дополнительные
@@ -82,31 +80,27 @@
 
 Типичные варианты:
 
-**Вариант 1: peer auth (Linux, стандартный PostgreSQL из пакетов)**
+**Вариант 1: ваш пользователь — суперпользователь PostgreSQL**
 
-Если PostgreSQL установлен системным пакетным менеджером, запускайте скрипты через `sudo -u postgres`:
+Если ваш системный пользователь является суперпользователем PostgreSQL, укажите его через `PG_SUPERUSER`:
+
+```shell
+PG_SUPERUSER=danil ./run_all_tests.sh
+```
+
+**Вариант 2: password auth (Docker, CI)**
+
+Если PostgreSQL доступен по TCP с паролем (по умолчанию используются `PGHOST=127.0.0.1`, `PGPASSWORD=postgres`):
+
+```shell
+./run_all_tests.sh
+```
+
+**Вариант 3: peer auth через sudo (Linux, стандартный PostgreSQL из пакетов)**
 
 ```shell
 sudo -u postgres ./tests/create.sh
 sudo -u postgres ./tests/all.sh
-```
-
-**Вариант 2: password auth (macOS, Docker, нестандартная установка)**
-
-Задайте переменные окружения:
-
-```shell
-export PGHOST=127.0.0.1
-export PGPASSWORD=postgres
-./run_all_tests.sh
-```
-
-**Вариант 3: ваш пользователь — суперпользователь PostgreSQL**
-
-Если ваш системный пользователь уже является суперпользователем PostgreSQL (например, на macOS через Homebrew), скрипты сработают напрямую:
-
-```shell
-./run_all_tests.sh
 ```
 
 ## Создание базы
@@ -140,7 +134,7 @@ openbill=# \dt openbill*
  public | openbill_categories   | table | danil
  public | openbill_holds        | table | danil
  public | openbill_policies     | table | danil
- public | openbill_transfers | table | danil
+ public | openbill_transfers    | table | danil
 (5 rows)
 ```
 
@@ -234,6 +228,58 @@ openbill=# select amount_currency, sum(amount_value) from openbill_accounts grou
 (1 row)
 ```
 
+## Обратные операции (возвраты)
+
+Для возврата средств создаётся transfer с полем `reverse_transaction_id`, указывающим на исходную операцию. Обратная операция должна иметь ту же сумму, валюту и зеркальные счета:
+
+```shell
+-- Исходная операция (id = 1): счёт 3 → счёт 1, 500 USD
+-- Возврат:
+openbill=# insert into openbill_transfers
+  (reverse_transaction_id, from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
+  values (1, 1, 3, 500, 'USD', 'refund:12345', 'Возврат оплаты');
+```
+
+Триггер `process_reverse_transaction` проверяет, что исходная операция существует и параметры совпадают. Политики (`OPENBILL_POLICIES`) должны разрешать обратные операции (`allow_reverse = true`).
+
+## Блокировка средств (HOLDS)
+
+Блокировка замораживает часть баланса счёта. Заблокированные средства нельзя потратить через transfer, но они остаются на счёте.
+
+```shell
+-- На счёте 1 есть 500 USD. Блокируем 200:
+openbill=# insert into openbill_holds
+  (account_id, amount_value, amount_currency, idempotency_key, details)
+  values (1, 200, 'USD', 'hold:order:789', 'Бронирование средств');
+```
+
+После блокировки: `amount_value = 300` (доступно), `hold_value = 200` (заморожено).
+
+Для разблокировки — вставляется запись с отрицательной суммой и ссылкой на исходный hold через `hold_key`:
+
+```shell
+-- Разблокируем 200:
+openbill=# insert into openbill_holds
+  (account_id, amount_value, amount_currency, idempotency_key, hold_key, details)
+  values (1, -200, 'USD', 'unhold:order:789', 'hold:order:789', 'Снятие брони');
+```
+
+Ограничения:
+* Нельзя заблокировать больше, чем доступно на счёте
+* Нельзя разблокировать больше, чем заблокировано
+* Разблокировка (`amount_value < 0`) обязана иметь `hold_key`
+* Блокировка (`amount_value > 0`) не может иметь `hold_key`
+
+## Уведомления (pg_notify)
+
+При каждом INSERT в `OPENBILL_TRANSFERS` PostgreSQL отправляет уведомление в канал `openbill_transfers` с id операции в payload. Внешние приложения могут подписаться:
+
+```shell
+openbill=# LISTEN openbill_transfers;
+-- при новом transfer:
+-- Asynchronous notification "openbill_transfers" with payload "42" received from server
+```
+
 ## Политика ограничений перемещений
 
 Используя таблицу `OPENBILL_POLICIES` можно указать между какими именно счетами и
@@ -311,32 +357,6 @@ PGUSER=postgres PGDATABASE=openbill_test ruby ./parallel_tests.rb \
   -u 2
 ```
 
-## Список тестов:
-
-### Разрешающие
-
-* [x] Создаётся аккаунт
-* [x] Проводится транзакция
-
-### Запрещающие
-
-Транзакции:
-
-* [x] Невозможно провести транзакцию с валютой, не совпадающей с любым из счетов.
-* [x] Невозможно удалить или изменить транзакцию.
-* [x] При создании транзакции невозможно переопределить `created_at`
-
-Аккаунты:
-
-* [x] Невозможно изменить `amount`, `amount_currency` или данные последней транзакции у счёта.
-* [x] `updated_at` аккаунта автоматически обновляется при любом изменении в счёте.
-* [x] Невозможно создать аккаунт с ненулевым балансом
-
-Безопасность:
-
-* [x] Типовой пользователь может только делать: select, insert для openbill_transfers; select, insert и update details для openbill_accounts
-* [x] Баланс всегда сходится
-
 # Прочее
 
 Смежные проекты (админка, модули для ruby и т.п.) - https://github.com/openbill-service
@@ -345,7 +365,3 @@ PGUSER=postgres PGDATABASE=openbill_test ruby ./parallel_tests.rb \
 
 * http://balancedbilly.readthedocs.org/en/latest/getting_started.html#create-a-customer
 * http://demo.opensourcebilling.org/invoices
-
-# Недостатки
-
-* Суперадмин PostgreSQL всё равно может всё испортить.
