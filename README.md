@@ -64,8 +64,8 @@
 * `V{номер}__{описание}.sql` - версионные миграции (схема, таблицы). Применяются один раз в порядке номера.
 * `R__{описание}.sql` - повторяемые миграции (триггеры, функции, права). Идемпотентны, перезапускаются при каждом создании БД.
 
-Файл `V000__initial_database.sql` содержит схему базы, остальные `V*` добавляют
-таблицы и поля, а `R__*` добавляют функции, триггеры и права доступа.
+Файл `V001__initial_schema.sql` содержит полную схему базы,
+а `R__*` добавляют функции, триггеры и права доступа.
 
 # Установка и использование
 
@@ -240,7 +240,7 @@ openbill=# insert into openbill_transfers
   values (1, 1, 3, 500, 'USD', 'refund:12345', 'Возврат оплаты');
 ```
 
-Триггер `process_reverse_transaction` проверяет, что исходная операция существует и параметры совпадают. Политики (`OPENBILL_POLICIES`) должны разрешать обратные операции (`allow_reverse = true`).
+Триггер `process_reverse_transfer` проверяет, что исходная операция существует и параметры совпадают. Политики (`OPENBILL_POLICIES`) должны разрешать обратные операции (`allow_reverse = true`).
 
 # Блокировка средств (Holds)
 
@@ -356,10 +356,10 @@ openbill=# LISTEN openbill_transfers;
 
 | Ограничение | Триггер |
 |-|-|
-| Баланс счёта меняется только через INSERT в TRANSFERS | `process_account_transaction` |
-| Валюта transfer должна совпадать с валютой обоих счетов | `process_account_transaction` |
-| Нельзя списать с заблокированного счёта (`locked_at`) | `process_account_transaction` |
-| Transfer должен соответствовать политике | `restrict_transaction` |
+| Баланс счёта меняется только через INSERT в TRANSFERS | `process_account_transfer` |
+| Валюта transfer должна совпадать с валютой обоих счетов | `process_account_transfer` |
+| Нельзя списать с заблокированного счёта (`locked_at`) | `process_account_transfer` |
+| Transfer должен соответствовать политике | `restrict_transfer` |
 
 ### Поле kind
 
@@ -399,6 +399,26 @@ PGUSER=postgres PGDATABASE=openbill_test ruby ./parallel_tests.rb \
   -a 1 \
   -u 2
 ```
+
+## Бенчмарк transfers (pgbench)
+
+Новый скрипт `tests/benchmark_transfers.sh` запускает воспроизводимый benchmark
+по сценариям `hot_pair`, `account_pool`, `hold_cycle` и формирует отчёт
+(`summary.json`, `samples.csv`, `report.md`) с метриками и характеристиками машины.
+
+Пример:
+
+```shell
+./tests/benchmark_transfers.sh \
+  --scenario hot_pair \
+  --clients 64 \
+  --threads 8 \
+  --duration 120 \
+  --warmup 20 \
+  --repeats 3
+```
+
+Артефакты запуска сохраняются в каталог `log/benchmarks/<run_id>/`.
 
 # Прочее
 

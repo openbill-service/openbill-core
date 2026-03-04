@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION process_account_transaction() RETURNS TRIGGER AS $process_transaction$
+CREATE OR REPLACE FUNCTION process_account_transfer() RETURNS TRIGGER AS $process_transfer$
 DECLARE
   v_from_account OPENBILL_ACCOUNTS%rowtype;
   v_to_currency character varying(8);
@@ -32,8 +32,8 @@ BEGIN
   return NEW;
 END
 
-$process_transaction$ LANGUAGE plpgsql SECURITY DEFINER;
+$process_transfer$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP TRIGGER IF EXISTS process_account_transaction ON OPENBILL_TRANSFERS;
-CREATE TRIGGER process_account_transaction
-  AFTER INSERT ON OPENBILL_TRANSFERS FOR EACH ROW EXECUTE PROCEDURE process_account_transaction();
+DROP TRIGGER IF EXISTS process_account_transfer ON OPENBILL_TRANSFERS;
+CREATE TRIGGER process_account_transfer
+  AFTER INSERT ON OPENBILL_TRANSFERS FOR EACH ROW EXECUTE PROCEDURE process_account_transfer();

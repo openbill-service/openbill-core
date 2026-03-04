@@ -56,12 +56,12 @@ guard
 
 ### Ключевые триггеры (в `R__*.sql`)
 
-- `process_account_transaction` (R__005) — главный триггер: при INSERT в TRANSFERS проверяет валюту и блокировку, обновляет балансы обоих счетов. Порядок UPDATE определяется по id (предотвращение deadlock).
-- `process_reverse_transaction` (R__008) — обратная транзакция.
-- `trg_transaction_delete` (R__002) / `trg_transaction_update` (R__004) — пересчёт балансов при удалении/изменении транзакций.
-- `OPENBILL_HOLDS_insert` (R__006) — блокировка/разблокировка средств.
-- `restrict_transaction` (R__009) — проверка политик переводов.
-- `notify_transaction` (R__007) — pg_notify при INSERT в TRANSFERS.
+- `process_account_transfer` (R__003) — главный триггер: при INSERT в TRANSFERS проверяет валюту и блокировку, обновляет балансы обоих счетов. Порядок UPDATE определяется по id (предотвращение deadlock).
+- `process_reverse_transfer` (R__006) — обратная транзакция.
+- `openbill_transfer_delete` (R__001) / `openbill_transfer_update` (R__002) — пересчёт балансов при удалении/изменении транзакций.
+- `openbill_holds_insert` (R__004) — блокировка/разблокировка средств.
+- `restrict_transfer` (R__007) — проверка политик переводов.
+- `notify_transfer` (R__005) — pg_notify при INSERT в TRANSFERS.
 - `pem_databasepermissions` (R__pem) — права для роли `public`.
 
 ### Защитные механизмы

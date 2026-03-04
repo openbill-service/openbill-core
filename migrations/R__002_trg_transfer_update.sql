@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION openbill_transaction_update() RETURNS TRIGGER  AS $process_transaction$
+CREATE OR REPLACE FUNCTION openbill_transfer_update() RETURNS TRIGGER  AS $process_transfer$
 BEGIN
 
   UPDATE OPENBILL_ACCOUNTS SET amount_value = amount_value - OLD.amount_value, transactions_count = transactions_count - 1 WHERE id = OLD.to_account_id;
@@ -11,8 +11,8 @@ BEGIN
   return NEW;
 END
 
-$process_transaction$ LANGUAGE plpgsql SECURITY DEFINER;
+$process_transfer$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP TRIGGER IF EXISTS openbill_transaction_update ON OPENBILL_TRANSFERS;
-CREATE TRIGGER openbill_transaction_update
-  AFTER UPDATE ON OPENBILL_TRANSFERS FOR EACH ROW EXECUTE PROCEDURE openbill_transaction_update();
+DROP TRIGGER IF EXISTS openbill_transfer_update ON OPENBILL_TRANSFERS;
+CREATE TRIGGER openbill_transfer_update
+  AFTER UPDATE ON OPENBILL_TRANSFERS FOR EACH ROW EXECUTE PROCEDURE openbill_transfer_update();

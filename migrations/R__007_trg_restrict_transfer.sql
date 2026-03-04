@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION restrict_transaction() RETURNS TRIGGER AS $restrict_transaction$
+CREATE OR REPLACE FUNCTION restrict_transfer() RETURNS TRIGGER AS $restrict_transfer$
 DECLARE
   _from_category_id bigint;
   _to_category_id bigint;
@@ -23,14 +23,14 @@ BEGIN
     );
 
   IF NOT FOUND THEN
-    RAISE EXCEPTION 'No policy for this transaction';
+    RAISE EXCEPTION 'No policy for this transfer';
   END IF;
 
   RETURN NEW;
 END
 
-$restrict_transaction$ LANGUAGE plpgsql;
+$restrict_transfer$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS restrict_transaction ON OPENBILL_TRANSFERS;
-CREATE TRIGGER restrict_transaction
-  AFTER INSERT ON OPENBILL_TRANSFERS FOR EACH ROW EXECUTE PROCEDURE restrict_transaction();
+DROP TRIGGER IF EXISTS restrict_transfer ON OPENBILL_TRANSFERS;
+CREATE TRIGGER restrict_transfer
+  AFTER INSERT ON OPENBILL_TRANSFERS FOR EACH ROW EXECUTE PROCEDURE restrict_transfer();
