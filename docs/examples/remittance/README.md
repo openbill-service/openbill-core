@@ -27,5 +27,5 @@ Status: ready
 4. Пример запрещённого маршрута: `RemitEscrow -> SenderSource`
 
 SQL-файлы:
-- [`categories-and-policies.sql`](categories-and-policies.sql)
-- [`operations.sql`](operations.sql)
+- [`categories-and-policies.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/remittance/categories-and-policies.sql)
+- [`operations.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/remittance/operations.sql)

@@ -30,5 +30,5 @@ Status: ready
 5. Пример запрещённого маршрута: `PlayerWallet -> TopupSource`
 
 SQL-файлы:
-- [`categories-and-policies.sql`](categories-and-policies.sql)
-- [`operations.sql`](operations.sql)
+- [`categories-and-policies.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/gaming/categories-and-policies.sql)
+- [`operations.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/gaming/operations.sql)

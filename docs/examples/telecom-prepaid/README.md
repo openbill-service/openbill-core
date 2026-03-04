@@ -27,5 +27,5 @@ Prepaid-контур телекома: пополнение абонента, п
 4. Пример запрещённого маршрута: `SubscriberWallet -> TopupSource`
 
 SQL-файлы:
-- [`categories-and-policies.sql`](categories-and-policies.sql)
-- [`operations.sql`](operations.sql)
+- [`categories-and-policies.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/telecom-prepaid/categories-and-policies.sql)
+- [`operations.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/telecom-prepaid/operations.sql)

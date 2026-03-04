@@ -24,5 +24,5 @@ Status: ready
 3. Пример запрещённого маршрута: `AffiliatePayable -> Revenue`
 
 SQL-файлы:
-- [`categories-and-policies.sql`](categories-and-policies.sql)
-- [`operations.sql`](operations.sql)
+- [`categories-and-policies.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/affiliate-payouts/categories-and-policies.sql)
+- [`operations.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/affiliate-payouts/operations.sql)

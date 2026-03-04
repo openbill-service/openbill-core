@@ -27,5 +27,5 @@ Status: ready
 4. Пример запрещённого маршрута: `UserWallet -> TopupSource`
 
 SQL-файлы:
-- [`categories-and-policies.sql`](categories-and-policies.sql)
-- [`operations.sql`](operations.sql)
+- [`categories-and-policies.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/p2p-wallet/categories-and-policies.sql)
+- [`operations.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/p2p-wallet/operations.sql)
