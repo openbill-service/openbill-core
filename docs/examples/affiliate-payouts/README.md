@@ -24,5 +24,5 @@ Status: ready
 3. Пример запрещённого маршрута: `AffiliatePayable -> Revenue`
 
 SQL-файлы:
-- `categories-and-policies.sql`
-- `operations.sql`
+- [`categories-and-policies.sql`](categories-and-policies.sql)
+- [`operations.sql`](operations.sql)

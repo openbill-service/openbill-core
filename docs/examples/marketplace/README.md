@@ -14,11 +14,24 @@ Status: ready
 - `Merchant`
 - `PlatformFee`
 
+### Описание категорий
+
+- `Customer` — счёт клиента (источник оплаты).
+- `Escrow` — промежуточный гарантийный счёт сделки.
+- `Merchant` — счёт мерчанта (получателя выручки).
+- `PlatformFee` — счёт комиссии платформы.
+
 ## Policies
 
 - `Customer -> Escrow` (`allow_reverse = true`)
 - `Escrow -> Merchant` (`allow_reverse = false`)
 - `Escrow -> PlatformFee` (`allow_reverse = false`)
+
+### Описание правил (policies)
+
+- `Customer -> Escrow` — клиентская оплата переводится в escrow; разрешён reverse для возврата.
+- `Escrow -> Merchant` — расчёт с мерчантом после подтверждения сделки.
+- `Escrow -> PlatformFee` — удержание комиссии платформы из escrow.
 
 ## Typical Operations
 
@@ -29,5 +42,5 @@ Status: ready
 5. Пример запрещённого маршрута: `Customer -> Merchant`
 
 SQL-файлы:
-- `categories-and-policies.sql`
-- `operations.sql`
+- [`categories-and-policies.sql`](categories-and-policies.sql)
+- [`operations.sql`](operations.sql)

@@ -31,5 +31,5 @@ Status: ready
 5. Пример запрещённого маршрута: `ExchangeVault_USD -> User_USD`
 
 SQL-файлы:
-- `categories-and-policies.sql`
-- `operations.sql`
+- [`categories-and-policies.sql`](categories-and-policies.sql)
+- [`operations.sql`](operations.sql)
