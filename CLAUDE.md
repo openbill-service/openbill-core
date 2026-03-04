@@ -50,7 +50,7 @@ guard
 |-|-|
 | `OPENBILL_CATEGORIES` | Группировка счетов (bigserial PK) |
 | `OPENBILL_ACCOUNTS` | Счета с балансом (`amount_value`/`amount_currency`), поле `kind`: negative/positive/any |
-| `OPENBILL_TRANSACTIONS` | Операции перемещения средств. `INSERT` — единственный способ создать транзакцию |
+| `OPENBILL_TRANSFERS` | Операции перемещения средств. `INSERT` — единственный способ создать транзакцию |
 | `OPENBILL_POLICIES` | Ограничения на допустимые направления переводов между категориями/счетами |
 | `OPENBILL_HOLDS` | Блокировка средств на счёте |
 
@@ -67,7 +67,7 @@ guard
 
 - Транзакции нельзя удалить или изменить (триггеры).
 - Баланс счёта нельзя изменить напрямую — только через INSERT в TRANSACTIONS.
-- `remote_idempotency_key` — уникальный ключ для идемпотентности.
+- `idempotency_key` — уникальный ключ для идемпотентности.
 - `locked_at` на счёте блокирует списание с него.
 - Политики (`OPENBILL_POLICIES`) ограничивают допустимые направления переводов.
 - Функции объявлены как `SECURITY DEFINER`.

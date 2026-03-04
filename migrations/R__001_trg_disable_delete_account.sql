@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION disable_update_account() RETURNS TRIGGER AS $disable_
 DECLARE
   query text;
 BEGIN
-  IF current_query() like 'insert into OPENBILL_TRANSACTIONS%' THEN
+  IF current_query() like 'insert into OPENBILL_TRANSFERS%' THEN
     RETURN NEW;
   ELSE
     RAISE EXCEPTION 'Cannot directly update amount_value and timestamps of account with query (#%)', current_query();
@@ -13,7 +13,7 @@ END
 
 $disable_update_account$ LANGUAGE plpgsql;
 
--- временно отключаем, так как она не правильно срабатывает на операциях типа INSERT INTO "openbill_transactions"
+-- временно отключаем, так как она не правильно срабатывает на операциях типа INSERT INTO "openbill_transfers"
 -- CREATE TRIGGER disable_update_account
   -- BEFORE UPDATE ON OPENBILL_ACCOUNTS FOR EACH ROW EXECUTE PROCEDURE disable_update_account();
 

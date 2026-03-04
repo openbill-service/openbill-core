@@ -15,6 +15,6 @@ END
 
 $process_transaction$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS constraint_accounts_currency_in_transactions ON OPENBILL_TRANSACTIONS;
+DROP TRIGGER IF EXISTS constraint_accounts_currency_in_transactions ON OPENBILL_TRANSFERS;
 CREATE TRIGGER constraint_accounts_currency_in_transactions
-  BEFORE INSERT OR UPDATE ON OPENBILL_TRANSACTIONS FOR EACH ROW EXECUTE PROCEDURE constraint_accounts_currency_in_transactions();
+  BEFORE INSERT OR UPDATE ON OPENBILL_TRANSFERS FOR EACH ROW EXECUTE PROCEDURE constraint_accounts_currency_in_transactions();

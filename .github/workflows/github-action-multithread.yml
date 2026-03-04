@@ -30,4 +30,4 @@ jobs:
     - name: Make tests
       run: PGUSER=postgres PGDATABASE=openbill_test ruby ./parallel_tests.rb -s ./tests/benchmark_test_scenario0.sh -a 1 -u 2
     - name: result
-      run: PGUSER=postgres PGDATABASE=openbill_test psql -qc "SELECT 'transactions' as descr, count(*) from public.openbill_transactions union select 'holds' as descr, count(*) from public.openbill_holds"
+      run: PGUSER=postgres PGDATABASE=openbill_test psql -qc "SELECT 'transactions' as descr, count(*) from public.openbill_transfers union select 'holds' as descr, count(*) from public.openbill_holds"

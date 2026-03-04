@@ -21,7 +21,7 @@ do
   fi
 done
 
-if [ $fails == 0 ]; then
+if [ "$fails" -eq 0 ]; then
   echo -e "${green}ALL DONE!"
   echo -e $reset
 else

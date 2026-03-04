@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION process_reverse_transaction() RETURNS TRIGGER AS $process_transaction$
 BEGIN
   IF NEW.reverse_transaction_id IS NOT NULL THEN
-    PERFORM * FROM openbill_transactions
+    PERFORM * FROM OPENBILL_TRANSFERS
       WHERE amount_value = NEW.amount_value
         AND amount_currency = NEW.amount_currency
         AND from_account_id = NEW.to_account_id
@@ -19,6 +19,6 @@ END
 
 $process_transaction$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS process_reverse_transaction ON OPENBILL_TRANSACTIONS;
+DROP TRIGGER IF EXISTS process_reverse_transaction ON OPENBILL_TRANSFERS;
 CREATE TRIGGER process_reverse_transaction
-  AFTER INSERT ON OPENBILL_TRANSACTIONS FOR EACH ROW EXECUTE PROCEDURE process_reverse_transaction();
+  AFTER INSERT ON OPENBILL_TRANSFERS FOR EACH ROW EXECUTE PROCEDURE process_reverse_transaction();

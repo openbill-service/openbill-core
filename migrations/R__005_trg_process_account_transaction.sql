@@ -29,6 +29,6 @@ END
 
 $process_transaction$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP TRIGGER IF EXISTS process_account_transaction ON OPENBILL_TRANSACTIONS;
+DROP TRIGGER IF EXISTS process_account_transaction ON OPENBILL_TRANSFERS;
 CREATE TRIGGER process_account_transaction
-  AFTER INSERT ON OPENBILL_TRANSACTIONS FOR EACH ROW EXECUTE PROCEDURE process_account_transaction();
+  AFTER INSERT ON OPENBILL_TRANSFERS FOR EACH ROW EXECUTE PROCEDURE process_account_transaction();

@@ -1,11 +1,8 @@
 # Openbill Core (SQL scheme, functions and triggers)
 
-[![Build Status](https://travis-ci.org/openbill-service/openbill-core.svg)](https://travis-ci.org/openbill-service/openbill-core)
+[![Build Status](https://github.com/openbill-service/openbill-core/actions/workflows/github-actions-func.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions)
 
-Ядро простого и надежного биллингa на хранимых процедурах для PostgreSQL >= 9.5
-(на младших не проверялось)
-
-Версия: v0.2.7
+Ядро простого и надежного биллинга на хранимых процедурах для PostgreSQL.
 
 Создан по принципу: "Меньше функций - больше надежности".
 
@@ -34,20 +31,20 @@
    категории счетов.
 2. Любая операция перемещения автоматически отражается на балансе задействованных счетов.
 3. Баланс системы (сумма всех остатков по счетам) всегда равен нулю.
-4. Типовой пользователь postgresql не имеет доступа к изменению баланса счетами, кроме как произвести операцию перевода с одного счета на другой.
+4. Типовой пользователь PostgreSQL не имеет доступа к изменению баланса счетами, кроме как произвести операцию перевода с одного счета на другой.
 
 # Зависимости
 
-* PostgreSQL версии не ниже 9.5
-* Руки, глаза, мозг. При найличии работающего Neuralink - руки и глаза не обязательны.
+* PostgreSQL версии не ниже 13
+* Руки, глаза, мозг. При наличии работающего Neuralink - руки и глаза не обязательны.
 
 # Сущности и операции
 
 ## Финансовые
 
-* Таблица `OPENBILL_ACCOUNTS` - счёт. Имеет уникальный uuid-идентификатор. Несёт информацию о состоянии счёта (балансе), валюте (поля `amount_value` и `amount_currency`).
-* Таблица `OPENBILL_TRANSACTIONS` - операция перемещения средств между счетами. Имеет уникальный идентификатор, идентификаторы входящего и исходящего счёта, сумму транзакции, описание.
-* Таблица `OPENBILL_HOLDS` - операция блокировки средств на счете. Имеет уникальный идентификатор, идентификатор счета, сумму блокировки, описание. Для разблокировки средств нужно добавить новую запись с отрицательной суммой, а в поле `hold_key` внести идентификатор операции блокировки
+* Таблица `OPENBILL_ACCOUNTS` - счёт. Имеет уникальный bigint-идентификатор. Несёт информацию о состоянии счёта (балансе), валюте (поля `amount_value` и `amount_currency`).
+* Таблица `OPENBILL_TRANSFERS` - операция перемещения средств между счетами. Имеет уникальный идентификатор, идентификаторы входящего и исходящего счёта, сумму транзакции, описание.
+* Таблица `OPENBILL_HOLDS` - операция блокировки средств на счёте. Имеет уникальный идентификатор, идентификатор счета, сумму блокировки, описание. Для разблокировки средств нужно добавить новую запись с отрицательной суммой, а в поле `hold_key` внести идентификатор операции блокировки.
 
 ## Дополнительные
 
@@ -58,33 +55,79 @@
 ## Перемещение средств
 
 Основная операция, регистрация перемещения средств (транзакция в финансовом смысле),
-делается через обычный SQL-запрос `INSERT INTO OPENBILL_TRANSACTION` и автоматически
+делается через обычный SQL-запрос `INSERT INTO OPENBILL_TRANSFERS` и автоматически
 изменяет остаток на затрагиваемых счетах.
 
 # Устройство
 
-Весь код проекта это SQL-файлы, которые находятся в каталоге `./sql`. Файлы именуются,
-начиная с цифры в порядке их выполнения при создании или миграции базы.
+Весь код проекта это SQL-файлы, которые находятся в каталоге `./migrations/`.
+Файлы именуются по конвенции Flyway (хотя сам Flyway не используется):
 
-Первый файл, `./sql/0_db.sql`, содержит схему базы, остальные добавляют
-необходимые функции и триггеры.
+* `V{номер}__{описание}.sql` - версионные миграции (схема, таблицы). Применяются один раз в порядке номера.
+* `R__{описание}.sql` - повторяемые миграции (триггеры, функции, права). Идемпотентны, перезапускаются при каждом создании БД.
+
+Файл `V000__initial_database.sql` содержит схему базы, остальные `V*` добавляют
+таблицы и поля, а `R__*` добавляют функции, триггеры и права доступа.
 
 # Установка и использование
 
-У вас уже должен быть установлен и настроен PostgreSQL версии не ниже 9.5 с
-беспарольным доступом от текущего пользователя ($PGUSER) с локального хоста.
+## Требования
 
-Далее запускаем создание базы.
+* PostgreSQL версии 13+
+* Текущий пользователь системы должен иметь возможность подключаться к PostgreSQL как суперпользователь (`postgres`). Скрипт `tests/create.sh` создаёт роль `openbill-test`, базу и применяет миграции.
 
-Все скрипты находящиеся в каталоге `./tests/*` используют базу указанную в
-переменной окружения `PGDATABASE`. Если переменная не указана, то используется имя `openbill_test`
+## Настройка доступа к PostgreSQL
+
+Скрипт `tests/create.sh` выполняет команды от имени `PGUSER=postgres`. Для этого необходимо, чтобы peer- или password-аутентификация для пользователя `postgres` работала с вашей системной учёткой.
+
+Типичные варианты:
+
+**Вариант 1: peer auth (Linux, стандартный PostgreSQL из пакетов)**
+
+Если PostgreSQL установлен системным пакетным менеджером, запускайте скрипты через `sudo -u postgres`:
 
 ```shell
-> PGDATABASE=openbill ./tests/create.sh
-Recreate database openbill
+sudo -u postgres ./tests/create.sh
+sudo -u postgres ./tests/all.sh
 ```
 
-Если этот скрипт завершился с успехом, значит вы имеете установленные таблицы,
+**Вариант 2: password auth (macOS, Docker, нестандартная установка)**
+
+Задайте переменные окружения:
+
+```shell
+export PGHOST=127.0.0.1
+export PGPASSWORD=postgres
+./run_all_tests.sh
+```
+
+**Вариант 3: ваш пользователь — суперпользователь PostgreSQL**
+
+Если ваш системный пользователь уже является суперпользователем PostgreSQL (например, на macOS через Homebrew), скрипты сработают напрямую:
+
+```shell
+./run_all_tests.sh
+```
+
+## Создание базы
+
+Все скрипты используют базу, указанную в переменной окружения `PGDATABASE`. По умолчанию — `openbill_test`.
+
+```shell
+# Тестовая база (по умолчанию)
+./tests/create.sh
+
+# Произвольная база
+PGDATABASE=openbill ./tests/create.sh
+```
+
+Скрипт `create.sh`:
+1. Создаёт роль `openbill-test` (если не существует)
+2. Пересоздаёт базу
+3. Применяет версионные миграции (`V???_*.sql`) — схема и таблицы
+4. Применяет повторяемые миграции (`R__*.sql`) — триггеры, функции, права
+
+Если скрипт завершился с успехом, значит вы имеете установленные таблицы,
 функции и триггеры openbill в указанной базе. Проверим:
 
 ```shell
@@ -95,27 +138,28 @@ openbill=# \dt openbill*
 --------+-----------------------+-------+-------
  public | openbill_accounts     | table | danil
  public | openbill_categories   | table | danil
- public | openbill_operations   | table | danil
- public | openbill_transactions | table | danil
-(6 rows)
+ public | openbill_holds        | table | danil
+ public | openbill_policies     | table | danil
+ public | openbill_transfers | table | danil
+(5 rows)
 ```
 
 ## Первоначальное состояние
 
-При иницализации вы получаете базу без счетов и транзакций, но с одной
+При инициализации вы получаете базу без счетов и транзакций, но с одной
 категорией и политикой, разрешающей операции между любыми счетами:
 
 ```shell
 openbill=# select * from openbill_categories;
- owner_id |                  id                  |  name  | parent_id
-----------+--------------------------------------+--------+-----------
-          | 12832d8d-43f5-499b-82a1-3466cadcd809 | System |
+ id |  name
+----+--------
+ -1 | System
 (1 row)
 
 openbill=# select * from openbill_policies;
-                  id                  |          name          | from_category_id | to_category_id | from_account_id | to_account_id | allow_reverse
---------------------------------------+------------------------+------------------+----------------+-----------------+---------------+---------------
- f5b3bca5-3e86-4d03-b637-bb82a5200695 | Allow any transactions |                  |                |                 |               | t
+ id |          name          | from_category_id | to_category_id | from_account_id | to_account_id | allow_reverse
+----+------------------------+------------------+----------------+-----------------+---------------+---------------
+  1 | Allow any transactions |                  |                |                 |               | t
 (1 row)
 ```
 
@@ -124,26 +168,26 @@ openbill=# select * from openbill_policies;
 Можете приступать к созданию пользовательских счетов:
 
 ```shell
-openbill=#  insert into openbill_accounts (key, category_id, details) values ('vasya', '12832d8d-43f5-499b-82a1-3466cadcd809', 'Счёт Василия');
-openbill=#  insert into openbill_accounts (key, category_id, details) values ('petya', '12832d8d-43f5-499b-82a1-3466cadcd809', 'Счёт Петра');
+openbill=# insert into openbill_accounts (category_id, details) values (-1, 'Счёт Василия');
+openbill=# insert into openbill_accounts (category_id, details) values (-1, 'Счёт Петра');
 ```
 
-А теперь создадим системый счёт, через который, будут приходить поступления на пользовательские счета. Например, это будет счёт приема оплаты
+А теперь создадим системный счёт, через который будут приходить поступления на пользовательские счета. Например, это будет счёт приёма оплаты
 через CloudPayments:
 
 ```shell
-openbill=# insert into openbill_accounts (key, category_id, details) values ('cloudpayments', '12832d8d-43f5-499b-82a1-3466cadcd809', 'CloudPayments income');  
+openbill=# insert into openbill_accounts (category_id, details) values (-1, 'CloudPayments income');
 ```
 
 В итоге имеем счета:
 
 ```shell
-openbill=# select id, key, amount_value, amount_currency from openbill_accounts;
-                  id                  |      key      | amount_value | amount_currency
---------------------------------------+---------------+--------------+-----------------
- b2c8e271-902a-4c7a-ae76-03f0c9674b37 | vasya         |            0 | USD
- 8764affd-5df5-4b6d-a0b4-821bd8770aed | petya         |            0 | USD
- 84d0fbce-1394-4c8b-8318-24003b2be0bc | cloudpayments |            0 | USD
+openbill=# select id, details, amount_value, amount_currency from openbill_accounts;
+ id |       details        | amount_value | amount_currency
+----+----------------------+--------------+-----------------
+  1 | Счёт Василия         |            0 | USD
+  2 | Счёт Петра           |            0 | USD
+  3 | CloudPayments income |            0 | USD
 ```
 
 Проверяем общий баланс:
@@ -158,26 +202,26 @@ openbill=# select amount_currency, sum(amount_value) from openbill_accounts grou
 
 ## Регистрация операций
 
-Предположим, что Василий внёс оплату 500$ в Вашу систему через CloudPayments,
+Предположим, что Василий внёс оплату 500$ в вашу систему через CloudPayments,
 регистрируем операцию:
 
 ```shell
-openbill=# insert into openbill_transactions (key, from_account_id, to_account_id, amount_value, amount_currency, details)
-           values ('12345', '84d0fbce-1394-4c8b-8318-24003b2be0bc', 'b2c8e271-902a-4c7a-ae76-03f0c9674b37', 500, 'USD', 'Поступление через CloudPayments 500$, транзакция N12345');
+openbill=# insert into openbill_transfers (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
+           values (3, 1, 500, 'USD', 'cloudpayments:12345', 'Поступление через CloudPayments 500$, транзакция N12345');
 ```
 
-Обратите внимание, что поле `key` содержит идентификатор транзакции от поставщика (`12345`) и служит защитным механизмом для избежания дублирования операций.
+Обратите внимание, что поле `idempotency_key` содержит идентификатор транзакции от поставщика и служит защитным механизмом для избежания дублирования операций.
 Поэтому для каждой транзакции необходимо создавать уникальный ключ.
 
 Смотрим состояние счетов:
 
 ```shell
-openbill=# select id, key, amount_value, amount_currency from openbill_accounts;
-                  id                  |      key      | amount_value | amount_currency
---------------------------------------+---------------+--------------+-----------------
- 8764affd-5df5-4b6d-a0b4-821bd8770aed | petya         |            0 | USD
- 84d0fbce-1394-4c8b-8318-24003b2be0bc | cloudpayments |         -500 | USD
- b2c8e271-902a-4c7a-ae76-03f0c9674b37 | vasya         |          500 | USD
+openbill=# select id, details, amount_value, amount_currency from openbill_accounts;
+ id |       details        | amount_value | amount_currency
+----+----------------------+--------------+-----------------
+  1 | Счёт Василия         |          500 | USD
+  2 | Счёт Петра           |            0 | USD
+  3 | CloudPayments income |         -500 | USD
 ```
 
 Общий баланс:
@@ -192,11 +236,11 @@ openbill=# select amount_currency, sum(amount_value) from openbill_accounts grou
 
 ## Политика ограничений перемещений
 
-Используя таблицу `OPENBILL_POLICIES` можно указать между каким именно счетами и
+Используя таблицу `OPENBILL_POLICIES` можно указать между какими именно счетами и
 категориями счетов разрешается проводить операции. Если значение счета или
 категории NULL - значит это правило действует для любой категории или счета.
 
-Если проводимая транзакция не нашла соответсвующего разрешения в
+Если проводимая транзакция не нашла соответствующего разрешения в
 `OPENBILL_POLICIES`, то она отклоняется.
 
 Больше примеров тут – `./tests/*`
@@ -211,26 +255,40 @@ openbill=# select amount_currency, sum(amount_value) from openbill_accounts grou
 
 # Тестирование
 
-Запускаем все тесты так (по-умолчанию в базе `openbill_test`):
+## Запуск всех тестов
 
 ```shell
-> ./run_all_tests.sh
+./run_all_tests.sh
 ```
 
-Параллельные тесты (запускаем после `./run_all_tests.sh`)
+Этот скрипт пересоздаёт базу `openbill_test` и прогоняет все `tests/test_*.sh`. После каждого теста проверяется сходимость баланса (`assert_balance.sh`).
 
+Если `PGUSER=postgres` peer auth не работает для вашего пользователя, используйте один из способов, описанных в разделе «Настройка доступа к PostgreSQL» выше.
+
+## Запуск одного теста
+
+```shell
+./tests/test_successful_transaction.sh
 ```
-PGUSER=postgres PGDATABASE=openbill_test time ruby ./parallel_tests.rb \
+
+Каждый тест самодостаточен: инициализирует БД, создаёт тестовые данные и проверяет результат.
+
+## Параллельные тесты (нагрузочные)
+
+Запускаются после `./run_all_tests.sh` (требуют Ruby):
+
+```shell
+PGUSER=postgres PGDATABASE=openbill_test ruby ./parallel_tests.rb \
   -s ./tests/benchmark_test_scenario0.sh \
-  -a 12832d8d-43f5-499b-82a1-000000000001 \
-  -u 12832d8d-43f5-499b-82a1-000000000002
+  -a 1 \
+  -u 2
 ```
 
 ## Список тестов:
 
 ### Разрешающие
 
-* [x] Создается аккаунт
+* [x] Создаётся аккаунт
 * [x] Проводится транзакция
 
 ### Запрещающие
@@ -238,41 +296,29 @@ PGUSER=postgres PGDATABASE=openbill_test time ruby ./parallel_tests.rb \
 Транзакции:
 
 * [x] Невозможно провести транзакцию с валютой, не совпадающей с любым из счетов.
-* [x] Невозможно удалить или изменить транзакцию .
-* [x] При создании транзакции не возможно переопределить `created_at`
+* [x] Невозможно удалить или изменить транзакцию.
+* [x] При создании транзакции невозможно переопределить `created_at`
 
 Аккаунты:
 
-* [x] Невозможно изменить `amount`, `amount_currency` или данные последней транзакции у счета.
+* [x] Невозможно изменить `amount`, `amount_currency` или данные последней транзакции у счёта.
 * [x] `updated_at` аккаунта автоматически обновляется при любом изменении в счёте.
-* [x] Невозможно создать аккаунт с не нулевым балансом
+* [x] Невозможно создать аккаунт с ненулевым балансом
 
 Безопасность:
 
-* [x] Типовой пользователь может только делать:*** select, insert для openbill_transactions; select, insert и update detauls для openbill_accounts
+* [x] Типовой пользователь может только делать: select, insert для openbill_transfers; select, insert и update details для openbill_accounts
 * [x] Баланс всегда сходится
 
 # Прочее
 
-Смежные проекты (админка, модули для ruby и тп) - https://github.com/openbill-service
+Смежные проекты (админка, модули для ruby и т.п.) - https://github.com/openbill-service
 
 ## Другие решения
 
 * http://balancedbilly.readthedocs.org/en/latest/getting_started.html#create-a-customer
 * http://demo.opensourcebilling.org/invoices
 
-# TODO
-
-Проект движется в сторону уменьшения ответственностей.
-
-* [X] Выпилить OPENBILL_INVOICES
-* [X] Поля meta перевести на JSONB
-* [X] Удалить parent_id из OPENBILL_CATEGORIES
-* [X] Отказаться от owner_id, key OPENBILL_ACCOUNTS
-* [ ] Рассмотреть вопрос об удалении key из OPENBILL_TRANSACTIONS
-
 # Недостатки
 
-* Неудачно выбрано название таблицы операций перемещения
-  (`OPENBILL_TRANSACTION`), из-за чего происходит путаница с SQL-транзакциями.
-* Супер-админ PostgreSQL всёравно может всё испортить.
+* Суперадмин PostgreSQL всё равно может всё испортить.

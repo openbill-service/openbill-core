@@ -9,6 +9,6 @@ END
 
 $process_transaction$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP TRIGGER IF EXISTS openbill_transaction_delete ON OPENBILL_TRANSACTIONS;
+DROP TRIGGER IF EXISTS openbill_transaction_delete ON OPENBILL_TRANSFERS;
 CREATE TRIGGER openbill_transaction_delete
-  BEFORE DELETE ON OPENBILL_TRANSACTIONS FOR EACH ROW EXECUTE PROCEDURE openbill_transaction_delete();
+  BEFORE DELETE ON OPENBILL_TRANSFERS FOR EACH ROW EXECUTE PROCEDURE openbill_transaction_delete();
