@@ -27,6 +27,8 @@ jobs:
       uses: actions/checkout@v2
     - name: createdb
       run: ./run_all_tests.sh
+    - name: Make examples tests
+      run: ./test-examples.sh
     - name: Make tests
       run: PGUSER=postgres PGDATABASE=openbill_test ruby ./parallel_tests.rb -s ./tests/benchmark_test_scenario0.sh -a 1 -u 2
     - name: result
