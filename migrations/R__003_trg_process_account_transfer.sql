@@ -29,7 +29,7 @@ BEGIN
     UPDATE OPENBILL_ACCOUNTS SET amount_value = amount_value - NEW.amount_value, transactions_count = transactions_count + 1 WHERE id = NEW.from_account_id;
   END IF;
 
-  return NEW;
+  RETURN NEW;
 END
 
 $process_transfer$ LANGUAGE plpgsql SECURITY DEFINER;

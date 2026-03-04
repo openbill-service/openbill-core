@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION notify_transfer() RETURNS TRIGGER AS $notify_transfer
 BEGIN
   PERFORM pg_notify('openbill_transfers', CAST(NEW.id AS text));
 
-  return NEW;
+  RETURN NEW;
 END
 
 $notify_transfer$ LANGUAGE plpgsql;

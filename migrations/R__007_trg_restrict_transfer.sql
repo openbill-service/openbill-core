@@ -3,8 +3,8 @@ DECLARE
   _from_category_id bigint;
   _to_category_id bigint;
 BEGIN
-  SELECT category_id FROM OPENBILL_ACCOUNTS where id = NEW.from_account_id INTO _from_category_id;
-  SELECT category_id FROM OPENBILL_ACCOUNTS where id = NEW.to_account_id INTO _to_category_id;
+  SELECT category_id FROM OPENBILL_ACCOUNTS WHERE id = NEW.from_account_id INTO _from_category_id;
+  SELECT category_id FROM OPENBILL_ACCOUNTS WHERE id = NEW.to_account_id INTO _to_category_id;
   PERFORM * FROM OPENBILL_POLICIES WHERE
     (
       NEW.reverse_transaction_id is null AND

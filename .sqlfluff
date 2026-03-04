@@ -1,0 +1,12 @@
+[sqlfluff]
+dialect = postgres
+templater = raw
+sql_file_exts = .sql
+max_line_length = 120
+rules = CP01,CP02,LT01,LT02,LT08
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.identifiers]
+extended_capitalisation_policy = lower

@@ -28,7 +28,7 @@ BEGIN
 
   UPDATE OPENBILL_ACCOUNTS SET amount_value = amount_value - NEW.amount_value, hold_value = hold_value + NEW.amount_value WHERE id = NEW.account_id;
 
-  return NEW;
+  RETURN NEW;
 END
 
 $process_hold$ LANGUAGE plpgsql SECURITY DEFINER;

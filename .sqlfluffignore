@@ -1,0 +1,2 @@
+# psql meta-commands and :variables in benchmark scripts are not parsed well by layout rules
+tests/bench/scenarios/*.sql

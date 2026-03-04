@@ -14,7 +14,7 @@ BEGIN
 
   END IF;
 
-  return NEW;
+  RETURN NEW;
 END
 
 $process_transfer$ LANGUAGE plpgsql;
