@@ -264,7 +264,29 @@ openbill=# insert into openbill_holds
   values (1, -200, 'USD', 'unhold:order:789', 'hold:order:789', 'Снятие брони');
 ```
 
-Ограничения:
+### Capture (списание из холда)
+
+Типичный платёжный сценарий: заблокировать средства, затем списать. Это делается в одной SQL-транзакции — разблокировка + transfer:
+
+```sql
+BEGIN;
+  -- Разблокировать
+  INSERT INTO openbill_holds
+    (account_id, amount_value, amount_currency, idempotency_key, hold_key, details)
+    VALUES (1, -200, 'USD', 'capture:order:789', 'hold:order:789', 'Capture');
+  -- Списать
+  INSERT INTO openbill_transfers
+    (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
+    VALUES (1, 2, 200, 'USD', 'payment:order:789', 'Оплата заказа #789');
+COMMIT;
+```
+
+### TTL холдов
+
+Openbill не управляет сроком жизни холдов — это ответственность приложения. Приложение должно отслеживать устаревшие холды (например, по полю `created_at`) и разблокировать их.
+
+### Ограничения
+
 * Нельзя заблокировать больше, чем доступно на счёте
 * Нельзя разблокировать больше, чем заблокировано
 * Разблокировка (`amount_value < 0`) обязана иметь `hold_key`
@@ -303,7 +325,7 @@ openbill=# LISTEN openbill_transfers;
 | `OPENBILL_ACCOUNTS` | + | + | только `locked_at`, `details` | + (*) |
 | `OPENBILL_TRANSFERS` | + | + | - | - |
 | `OPENBILL_POLICIES` | + | + | + | + |
-| `OPENBILL_HOLDS` | - | + | - | - |
+| `OPENBILL_HOLDS` | + | + | - | - |
 
 (*) DELETE разрешён только для счетов без transfers (см. триггеры ниже).
 
