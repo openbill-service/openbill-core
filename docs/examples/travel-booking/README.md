@@ -27,5 +27,5 @@ Status: ready
 4. Пример запрещённого маршрута: `BookingEscrow -> Traveler`
 
 SQL-файлы:
-- [`categories-and-policies.sql`](categories-and-policies.sql)
-- [`operations.sql`](operations.sql)
+- [`categories-and-policies.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/travel-booking/categories-and-policies.sql)
+- [`operations.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/travel-booking/operations.sql)

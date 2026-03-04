@@ -9,13 +9,6 @@ Status: ready
 
 ## Categories
 
-- `Customer`
-- `Escrow`
-- `Merchant`
-- `PlatformFee`
-
-### Описание категорий
-
 - `Customer` — счёт клиента (источник оплаты).
 - `Escrow` — промежуточный гарантийный счёт сделки.
 - `Merchant` — счёт мерчанта (получателя выручки).
@@ -23,15 +16,9 @@ Status: ready
 
 ## Policies
 
-- `Customer -> Escrow` (`allow_reverse = true`)
-- `Escrow -> Merchant` (`allow_reverse = false`)
-- `Escrow -> PlatformFee` (`allow_reverse = false`)
-
-### Описание правил (policies)
-
-- `Customer -> Escrow` — клиентская оплата переводится в escrow; разрешён reverse для возврата.
-- `Escrow -> Merchant` — расчёт с мерчантом после подтверждения сделки.
-- `Escrow -> PlatformFee` — удержание комиссии платформы из escrow.
+- `Customer -> Escrow` (`возвращаемые`) — клиентская оплата переводится в escrow; reverse разрешён для возврата.
+- `Escrow -> Merchant` (`невозвращаемые`) — расчёт с мерчантом после подтверждения сделки.
+- `Escrow -> PlatformFee` (`невозвращаемые`) — удержание комиссии платформы из escrow.
 
 ## Typical Operations
 
@@ -42,5 +29,5 @@ Status: ready
 5. Пример запрещённого маршрута: `Customer -> Merchant`
 
 SQL-файлы:
-- [`categories-and-policies.sql`](categories-and-policies.sql)
-- [`operations.sql`](operations.sql)
+- [`categories-and-policies.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/marketplace/categories-and-policies.sql)
+- [`operations.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/marketplace/operations.sql)

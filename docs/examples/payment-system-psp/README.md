@@ -31,5 +31,5 @@ Status: ready
 5. Пример запрещённого маршрута: `PayerSource -> MerchantSettlement`
 
 SQL-файлы:
-- [`categories-and-policies.sql`](categories-and-policies.sql)
-- [`operations.sql`](operations.sql)
+- [`categories-and-policies.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/payment-system-psp/categories-and-policies.sql)
+- [`operations.sql`](https://github.com/openbill-service/openbill-core/blob/master/docs/examples/payment-system-psp/operations.sql)
