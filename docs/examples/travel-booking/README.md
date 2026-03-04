@@ -27,5 +27,5 @@ Status: ready
 4. Пример запрещённого маршрута: `BookingEscrow -> Traveler`
 
 SQL-файлы:
-- `categories-and-policies.sql`
-- `operations.sql`
+- [`categories-and-policies.sql`](categories-and-policies.sql)
+- [`operations.sql`](operations.sql)

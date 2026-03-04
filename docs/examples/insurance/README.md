@@ -27,5 +27,5 @@ Status: ready
 4. Пример запрещённого маршрута: `InsuranceReserve -> PremiumInflow`
 
 SQL-файлы:
-- `categories-and-policies.sql`
-- `operations.sql`
+- [`categories-and-policies.sql`](categories-and-policies.sql)
+- [`operations.sql`](operations.sql)
