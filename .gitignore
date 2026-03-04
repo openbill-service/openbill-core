@@ -4,4 +4,6 @@
 *.todo
 /log/*
 .venv-sqlfluff/
+.venv-mkdocs/
+.playwright-cli/
 site/
