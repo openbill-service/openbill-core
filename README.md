@@ -67,6 +67,31 @@
 Файл `V001__initial_schema.sql` содержит полную схему базы,
 а `R__*` добавляют функции, триггеры и права доступа.
 
+# SQL стиль и нотация
+
+В проекте используется `sqlfluff` с правилами:
+
+* SQL-ключевые слова пишутся в `UPPERCASE` (`SELECT`, `INSERT`, `UPDATE`, `WHERE`, `RETURN` и т.д.).
+* Некавыченные идентификаторы пишутся в `lower_snake_case` (`openbill_accounts`, `from_account_id`).
+
+Локальные команды:
+
+```shell
+./scripts/sql_lint.sh
+./scripts/sql_fix.sh
+```
+
+`pre-commit`:
+
+```shell
+pip install pre-commit
+pre-commit install
+pre-commit run --all-files
+```
+
+CI-проверка SQL-стиля настроена в workflow:
+`.github/workflows/sql-style.yml`.
+
 # Установка и использование
 
 ## Требования

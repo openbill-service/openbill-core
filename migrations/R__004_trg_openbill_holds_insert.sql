@@ -33,6 +33,6 @@ END
 
 $process_hold$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP TRIGGER IF EXISTS openbill_holds_insert ON OPENBILL_HOLDS;
+DROP TRIGGER IF EXISTS openbill_holds_insert ON openbill_holds;
 CREATE TRIGGER openbill_holds_insert
-  BEFORE INSERT ON OPENBILL_HOLDS FOR EACH ROW EXECUTE PROCEDURE openbill_holds_insert();
+  BEFORE INSERT ON openbill_holds FOR EACH ROW EXECUTE PROCEDURE openbill_holds_insert();

@@ -13,6 +13,6 @@ END
 
 $process_transfer$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP TRIGGER IF EXISTS openbill_transfer_update ON OPENBILL_TRANSFERS;
+DROP TRIGGER IF EXISTS openbill_transfer_update ON openbill_transfers;
 CREATE TRIGGER openbill_transfer_update
-  AFTER UPDATE ON OPENBILL_TRANSFERS FOR EACH ROW EXECUTE PROCEDURE openbill_transfer_update();
+  AFTER UPDATE ON openbill_transfers FOR EACH ROW EXECUTE PROCEDURE openbill_transfer_update();

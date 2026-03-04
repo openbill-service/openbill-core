@@ -34,6 +34,6 @@ END
 
 $process_transfer$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP TRIGGER IF EXISTS process_account_transfer ON OPENBILL_TRANSFERS;
+DROP TRIGGER IF EXISTS process_account_transfer ON openbill_transfers;
 CREATE TRIGGER process_account_transfer
-  AFTER INSERT ON OPENBILL_TRANSFERS FOR EACH ROW EXECUTE PROCEDURE process_account_transfer();
+  AFTER INSERT ON openbill_transfers FOR EACH ROW EXECUTE PROCEDURE process_account_transfer();
