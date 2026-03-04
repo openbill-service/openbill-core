@@ -1,17 +1,6 @@
--- Disable delete and update in OPENBILL_ACCOUNTS
-
-CREATE OR REPLACE FUNCTION create_account() RETURNS TRIGGER AS $$
-DECLARE
-  query text;
-BEGIN
-  IF NEW.amount_value <> 0 OR NEW.hold_value <> 0 THEN
-    RAISE EXCEPTION 'When creating an account, the balance must be equal to 0';
-  END IF;
- RETURN NEW;
-END
-
-$$ LANGUAGE plpgsql;
+-- Триггер create_account удалён:
+-- защиту от INSERT с ненулевым балансом обеспечивает колоночный GRANT INSERT
+-- (без amount_value, hold_value, transactions_count)
 
 DROP TRIGGER IF EXISTS create_account ON OPENBILL_ACCOUNTS;
-CREATE TRIGGER create_account
-  BEFORE INSERT ON OPENBILL_ACCOUNTS FOR EACH ROW EXECUTE PROCEDURE create_account();
+DROP FUNCTION IF EXISTS create_account();

@@ -52,7 +52,7 @@ CREATE TABLE OPENBILL_TRANSACTIONS (
   details         text not null,
   meta            jsonb not null default '{}'::jsonb,
   foreign key (from_account_id) REFERENCES OPENBILL_ACCOUNTS (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  foreign key (to_account_id) REFERENCES OPENBILL_ACCOUNTS (id)
+  foreign key (to_account_id) REFERENCES OPENBILL_ACCOUNTS (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 COMMENT ON TABLE OPENBILL_TRANSACTIONS IS 'The operation of transferring funds between accounts. Has a unique identifier, identifiers of incoming and outgoing accounts, transaction amount, description.';
 COMMENT ON COLUMN OPENBILL_TRANSACTIONS.id IS 'Transaction unique id';

@@ -12,8 +12,8 @@ export PGUSER=openbill-test
 ./tests/assert_result_include.sh "insert into OPENBILL_ACCOUNTS (id, category_id) values ($ACCOUNT1_UUID, $CATEGORY_UUID)" 'INSERT 0 1' && \
 ./tests/assert_result_include.sh "insert into OPENBILL_TRANSFERS (amount_value, amount_currency, from_account_id, to_account_id, idempotency_key, details) values (100, 'USD', $ACCOUNT1_UUID, $ACCOUNT2_UUID, 'gid://order1', 'test')" 'INSERT 0 1' && \
 
-# Нельзя удалить счёт с transfers
-./tests/assert_result_include.sh "delete from OPENBILL_ACCOUNTS where id=$ACCOUNT1_UUID" 'Cannot delete account with transactions' && \
+# Нельзя удалить счёт с transfers (FK RESTRICT)
+./tests/assert_result_include.sh "delete from OPENBILL_ACCOUNTS where id=$ACCOUNT1_UUID" 'violates foreign key constraint' && \
 
 # Можно обновлять details
 ./tests/assert_result_include.sh "update OPENBILL_ACCOUNTS set details='some' where id=$ACCOUNT1_UUID" 'UPDATE 1' && \

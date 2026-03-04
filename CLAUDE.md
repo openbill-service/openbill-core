@@ -56,17 +56,19 @@ guard
 
 ### Ключевые триггеры (в `R__*.sql`)
 
-- `process_account_transaction` (R__005) — главный триггер: при INSERT в TRANSACTIONS обновляет балансы обоих счетов. Порядок UPDATE определяется по id (предотвращение deadlock).
+- `process_account_transaction` (R__005) — главный триггер: при INSERT в TRANSFERS проверяет валюту и блокировку, обновляет балансы обоих счетов. Порядок UPDATE определяется по id (предотвращение deadlock).
 - `process_reverse_transaction` (R__008) — обратная транзакция.
-- `trg_constraint_account_currency` (R__003) — запрет изменения валюты/баланса напрямую.
-- `trg_transaction_delete` (R__002) / `trg_transaction_update` (R__004) — запрет удаления/изменения транзакций.
-- `trg_create_account` (R__010) — валидация при создании счёта (баланс = 0).
-- `pem_databasepermissions` (R__pem) — права для роли `openbill-test`.
+- `trg_transaction_delete` (R__002) / `trg_transaction_update` (R__004) — пересчёт балансов при удалении/изменении транзакций.
+- `OPENBILL_HOLDS_insert` (R__006) — блокировка/разблокировка средств.
+- `restrict_transaction` (R__009) — проверка политик переводов.
+- `notify_transaction` (R__007) — pg_notify при INSERT в TRANSFERS.
+- `pem_databasepermissions` (R__pem) — права для роли `public`.
 
 ### Защитные механизмы
 
 - Транзакции нельзя удалить или изменить (триггеры).
-- Баланс счёта нельзя изменить напрямую — только через INSERT в TRANSACTIONS.
+- Счёт нельзя удалить, если на него ссылаются transfers или holds (FK RESTRICT).
+- Баланс счёта нельзя изменить напрямую — только через INSERT в TRANSFERS (колоночные GRANT на INSERT и UPDATE).
 - `idempotency_key` — уникальный ключ для идемпотентности.
 - `locked_at` на счёте блокирует списание с него.
 - Политики (`OPENBILL_POLICIES`) ограничивают допустимые направления переводов.

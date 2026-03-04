@@ -1,21 +1,26 @@
 CREATE OR REPLACE FUNCTION process_account_transaction() RETURNS TRIGGER AS $process_transaction$
 DECLARE
- v_locked_at timestamp;
+  v_from_account OPENBILL_ACCOUNTS%rowtype;
+  v_to_currency character varying(8);
 BEGIN
-  -- У всех счетов и транзакции должна быть одинаковая валюта
-  IF NOT EXISTS (SELECT * FROM OPENBILL_ACCOUNTS WHERE id = NEW.from_account_id AND amount_currency = NEW.amount_currency) THEN
+  -- Загружаем from-счёт одним запросом: валюта + блокировка
+  SELECT * FROM OPENBILL_ACCOUNTS WHERE id = NEW.from_account_id INTO v_from_account;
+
+  IF v_from_account.amount_currency <> NEW.amount_currency THEN
     RAISE EXCEPTION 'Account (from #%) has wrong currency', NEW.from_account_id;
   END IF;
 
-  IF NOT EXISTS (SELECT * FROM OPENBILL_ACCOUNTS where id = NEW.to_account_id and amount_currency = NEW.amount_currency) THEN
+  IF v_from_account.locked_at IS NOT NULL THEN
+    RAISE EXCEPTION 'Account (from #%) is hold from %', NEW.to_account_id, v_from_account.locked_at;
+  END IF;
+
+  -- Проверяем валюту to-счёта
+  SELECT amount_currency FROM OPENBILL_ACCOUNTS WHERE id = NEW.to_account_id INTO v_to_currency;
+  IF v_to_currency <> NEW.amount_currency THEN
     RAISE EXCEPTION 'Account (to #%) has wrong currency', NEW.to_account_id;
   END IF;
 
-  IF EXISTS (SELECT * FROM OPENBILL_ACCOUNTS WHERE id = NEW.from_account_id AND locked_at IS NOT NULL) THEN
-    SELECT locked_at FROM OPENBILL_ACCOUNTS WHERE id = NEW.from_account_id INTO v_locked_at;
-    RAISE EXCEPTION 'Account (from #%) is hold from %', NEW.to_account_id, v_locked_at;
-  END IF;
-
+  -- Обновляем балансы (порядок по id для предотвращения deadlock)
   IF NEW.to_account_id > NEW.from_account_id THEN
     UPDATE OPENBILL_ACCOUNTS SET amount_value = amount_value - NEW.amount_value, transactions_count = transactions_count + 1 WHERE id = NEW.from_account_id;
     UPDATE OPENBILL_ACCOUNTS SET amount_value = amount_value + NEW.amount_value, transactions_count = transactions_count + 1 WHERE id = NEW.to_account_id;

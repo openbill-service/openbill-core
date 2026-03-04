@@ -2,10 +2,14 @@
 
 . ./tests/init.sh && \
 
-./tests/assert_result_include.sh "insert into OPENBILL_ACCOUNTS  (id, category_id, amount_value) values ($ACCOUNT1_UUID, $CATEGORY_UUID, 100)" 'ERROR:  When creating an account, the balance must be equal to 0' && \
+# Нельзя указать amount_value при INSERT (нет GRANT на колонку)
+./tests/assert_result_include.sh "insert into OPENBILL_ACCOUNTS  (id, category_id, amount_value) values ($ACCOUNT1_UUID, $CATEGORY_UUID, 100)" 'ERROR:  permission denied for table openbill_accounts' && \
 
-./tests/assert_result_include.sh "insert into OPENBILL_ACCOUNTS  (id, category_id,hold_value) values ($ACCOUNT1_UUID, $CATEGORY_UUID, 100)" 'ERROR:  When creating an account, the balance must be equal to 0' && \
+# Нельзя указать hold_value при INSERT (нет GRANT на колонку)
+./tests/assert_result_include.sh "insert into OPENBILL_ACCOUNTS  (id, category_id, hold_value) values ($ACCOUNT1_UUID, $CATEGORY_UUID, 100)" 'ERROR:  permission denied for table openbill_accounts' && \
 
-./tests/assert_result_include.sh "insert into OPENBILL_ACCOUNTS  (id, category_id, amount_value, hold_value) values ($ACCOUNT1_UUID, $CATEGORY_UUID, 100, 100)" 'ERROR:  When creating an account, the balance must be equal to 0' && \
+# Нельзя указать transactions_count при INSERT (нет GRANT на колонку)
+./tests/assert_result_include.sh "insert into OPENBILL_ACCOUNTS  (id, category_id, transactions_count) values ($ACCOUNT1_UUID, $CATEGORY_UUID, 5)" 'ERROR:  permission denied for table openbill_accounts' && \
 
-./tests/assert_result_include.sh "insert into OPENBILL_ACCOUNTS  (id, category_id, amount_value) values ($ACCOUNT1_UUID, $CATEGORY_UUID, 0)" 'INSERT 0 1'
+# Можно создать счёт с разрешёнными колонками (баланс = 0 по DEFAULT)
+./tests/assert_result_include.sh "insert into OPENBILL_ACCOUNTS  (id, category_id) values ($ACCOUNT1_UUID, $CATEGORY_UUID)" 'INSERT 0 1'
