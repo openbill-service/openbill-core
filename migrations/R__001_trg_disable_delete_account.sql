@@ -19,7 +19,10 @@ $disable_update_account$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION disable_delete_account() RETURNS TRIGGER AS $disable_delete_account$
 BEGIN
-  RAISE EXCEPTION 'Cannot delete account';
+  IF OLD.transactions_count > 0 THEN
+    RAISE EXCEPTION 'Cannot delete account with transactions';
+  END IF;
+  RETURN OLD;
 END
 
 $disable_delete_account$ LANGUAGE plpgsql;

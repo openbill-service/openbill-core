@@ -245,6 +245,33 @@ openbill=# select amount_currency, sum(amount_value) from openbill_accounts grou
 
 Больше примеров тут – `./tests/*`
 
+## Контроль доступа
+
+Типовой пользователь PostgreSQL (роль `public`) имеет ограниченный доступ к таблицам.
+
+### Права (GRANT)
+
+| Таблица | SELECT | INSERT | UPDATE | DELETE |
+|-|-|-|-|-|
+| `OPENBILL_CATEGORIES` | + | + | + (все колонки) | - |
+| `OPENBILL_ACCOUNTS` | + | + | только `locked_at`, `details` | + (*) |
+| `OPENBILL_TRANSFERS` | + | + | - | - |
+| `OPENBILL_POLICIES` | + | + | + | + |
+| `OPENBILL_HOLDS` | - | + | - | - |
+
+(*) DELETE разрешён только для счетов без transfers (см. триггеры ниже).
+
+### Защита триггерами
+
+| Ограничение | Триггер |
+|-|-|
+| Нельзя удалить счёт, участвовавший в transfers | `disable_delete_account` |
+| Баланс счёта меняется только через INSERT в TRANSFERS | `process_account_transaction` |
+| Нельзя создать счёт с ненулевым балансом | `create_account` |
+| Валюта transfer должна совпадать с валютой обоих счетов | `constraint_accounts_currency` |
+| Нельзя списать с заблокированного счёта (`locked_at`) | `process_account_transaction` |
+| Transfer должен соответствовать политике | `restrict_transaction` |
+
 ### Поле kind
 
 Поле служит для определения типа счета.
