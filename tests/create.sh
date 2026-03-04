@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 test -z "$PGDATABASE" && PGDATABASE='openbill_test'
-export PGUSER=postgres
+test -z "$PG_SUPERUSER" && PG_SUPERUSER=postgres
+export PGUSER=$PG_SUPERUSER
 
 TESTUSER=openbill-test
 
