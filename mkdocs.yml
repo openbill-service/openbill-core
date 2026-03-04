@@ -20,6 +20,7 @@ nav:
       - Быстрый старт: getting-started.md
       - Глоссарий: glossary.md
       - Операции: operations.md
+      - Policies: policies.md
       - Use Cases и policies: use-cases.md
   - Отраслевые примеры:
       - Каталог examples: examples/README.md
