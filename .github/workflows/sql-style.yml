@@ -1,0 +1,24 @@
+name: SQL style
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  sql-style:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install sqlfluff
+        run: pip install sqlfluff==3.4.1
+
+      - name: Lint SQL
+        run: ./scripts/sql_lint.sh
