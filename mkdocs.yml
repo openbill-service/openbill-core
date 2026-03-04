@@ -1,0 +1,27 @@
+site_name: Openbill Core Docs
+site_description: Документация Openbill Core
+site_url: https://openbill-service.github.io/openbill-core/
+repo_url: https://github.com/openbill-service/openbill-core
+repo_name: openbill-service/openbill-core
+
+theme:
+  name: material
+  language: ru
+  features:
+    - navigation.instant
+    - navigation.top
+    - content.code.copy
+
+nav:
+  - Главная: index.md
+  - Практика:
+      - Use Cases и policies: use-cases.md
+  - Производительность:
+      - Дизайн бенчмарка transfers: benchmark_transfers_design.md
+      - Отчёт pgbench (2026-03-04): pgbench_benchmark_report_2026-03-04.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true

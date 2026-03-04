@@ -4,3 +4,4 @@
 *.todo
 /log/*
 .venv-sqlfluff/
+site/
