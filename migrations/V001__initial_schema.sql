@@ -1,8 +1,8 @@
 CREATE TYPE account_kind AS ENUM ('negative', 'positive', 'any');
 
-CREATE                TABLE openbill_categories (
-  id                  bigserial PRIMARY KEY,
-  name                character varying(256) NOT NULL
+CREATE TABLE openbill_categories (
+    id bigserial PRIMARY KEY,
+    name character varying(256) NOT NULL
 );
 
 COMMENT ON TABLE openbill_categories IS 'Account category. A convenient way to group accounts, for example: user accounts and system accounts, and also restrict transactions.';
@@ -11,23 +11,23 @@ COMMENT ON COLUMN openbill_categories.name IS 'Account category name';
 
 CREATE UNIQUE INDEX index_openbill_categories_name ON openbill_categories USING btree (name);
 
-INSERT INTO openbill_categories  (name, id) VALUES ('System', -1);
+INSERT INTO openbill_categories (name, id) VALUES ('System', -1);
 
-CREATE                TABLE openbill_accounts (
-  id                  bigserial PRIMARY KEY,
-  category_id         bigint NOT NULL,
-  amount_value        numeric(36,18) NOT NULL DEFAULT 0,
-  amount_currency     character varying(8) NOT NULL DEFAULT 'USD',
-  details             text,
-  transactions_count  integer NOT NULL DEFAULT 0,
-  meta                jsonb NOT NULL DEFAULT '{}'::jsonb,
-  hold_value          numeric(36,18) NOT NULL DEFAULT 0,
-  locked_at           timestamp without time zone NULL,
-  kind                account_kind NOT NULL DEFAULT 'any',
-  created_at          timestamp without time zone DEFAULT current_timestamp,
-  updated_at          timestamp without time zone DEFAULT current_timestamp,
-  FOREIGN KEY (category_id) REFERENCES openbill_categories (id) ON DELETE RESTRICT,
-  CONSTRAINT openbill_accounts_kind CHECK ( (kind = 'positive' AND amount_value >=0) OR (kind = 'negative' AND amount_value<=0) OR kind = 'any' )
+CREATE TABLE openbill_accounts (
+    id bigserial PRIMARY KEY,
+    category_id bigint NOT NULL,
+    amount_value numeric(36, 18) NOT NULL DEFAULT 0,
+    amount_currency character varying(8) NOT NULL DEFAULT 'USD',
+    details text,
+    transactions_count integer NOT NULL DEFAULT 0,
+    meta jsonb NOT NULL DEFAULT '{}'::jsonb,
+    hold_value numeric(36, 18) NOT NULL DEFAULT 0,
+    locked_at timestamp without time zone NULL,
+    kind account_kind NOT NULL DEFAULT 'any',
+    created_at timestamp without time zone DEFAULT current_timestamp,
+    updated_at timestamp without time zone DEFAULT current_timestamp,
+    FOREIGN KEY (category_id) REFERENCES openbill_categories (id) ON DELETE RESTRICT,
+    CONSTRAINT openbill_accounts_kind CHECK ((kind = 'positive' AND amount_value >= 0) OR (kind = 'negative' AND amount_value <= 0) OR kind = 'any')
 );
 COMMENT ON TABLE openbill_accounts IS 'Account. Has a unique bigint identifier. Has information about the state of the account (balance), currency';
 COMMENT ON COLUMN openbill_accounts.id IS 'Account unique id';
@@ -47,20 +47,20 @@ CREATE INDEX index_accounts_on_meta ON openbill_accounts USING gin (meta);
 CREATE INDEX index_accounts_on_created_at ON openbill_accounts USING btree (created_at);
 
 CREATE TABLE openbill_transfers (
-  id              bigserial PRIMARY KEY,
-  billing_date    date DEFAULT current_date NOT NULL,
-  created_at      timestamp without time zone DEFAULT current_timestamp,
-  from_account_id bigint NOT NULL,
-  to_account_id   bigint NOT NULL CONSTRAINT different_accounts CHECK (to_account_id<>from_account_id),
-  amount_value    numeric(36,18) NOT NULL CONSTRAINT positive CHECK (amount_value>0),
-  amount_currency character varying(8) NOT NULL DEFAULT 'USD',
-  idempotency_key character varying(256) NOT NULL,
-  details         text NOT NULL,
-  meta            jsonb NOT NULL DEFAULT '{}'::jsonb,
-  reverse_transaction_id bigint,
-  FOREIGN KEY (from_account_id) REFERENCES openbill_accounts (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  FOREIGN KEY (to_account_id) REFERENCES openbill_accounts (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT reverse_transaction_foreign_key FOREIGN KEY (reverse_transaction_id) REFERENCES openbill_transfers (id)
+    id bigserial PRIMARY KEY,
+    billing_date date DEFAULT current_date NOT NULL,
+    created_at timestamp without time zone DEFAULT current_timestamp,
+    from_account_id bigint NOT NULL,
+    to_account_id bigint NOT NULL CONSTRAINT different_accounts CHECK (to_account_id <> from_account_id),
+    amount_value numeric(36, 18) NOT NULL CONSTRAINT positive CHECK (amount_value > 0),
+    amount_currency character varying(8) NOT NULL DEFAULT 'USD',
+    idempotency_key character varying(256) NOT NULL,
+    details text NOT NULL,
+    meta jsonb NOT NULL DEFAULT '{}'::jsonb,
+    reverse_transaction_id bigint,
+    FOREIGN KEY (from_account_id) REFERENCES openbill_accounts (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    FOREIGN KEY (to_account_id) REFERENCES openbill_accounts (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT reverse_transaction_foreign_key FOREIGN KEY (reverse_transaction_id) REFERENCES openbill_transfers (id)
 );
 COMMENT ON TABLE openbill_transfers IS 'The operation of transferring funds between accounts. Has a unique identifier, identifiers of incoming and outgoing accounts, transfer amount, description.';
 COMMENT ON COLUMN openbill_transfers.id IS 'Transfer unique id';
@@ -78,19 +78,19 @@ CREATE UNIQUE INDEX index_transfers_on_key ON openbill_transfers USING btree (id
 CREATE INDEX index_transfers_on_meta ON openbill_transfers USING gin (meta);
 CREATE INDEX index_transfers_on_created_at ON openbill_transfers USING btree (created_at);
 
-CREATE                TABLE openbill_policies (
-  id                  bigserial PRIMARY KEY,
-  name                character varying(256) NOT NULL,
-  from_category_id    bigint,
-  to_category_id      bigint,
-  from_account_id     bigint,
-  to_account_id       bigint,
-  allow_reverse       boolean NOT NULL DEFAULT true,
+CREATE TABLE openbill_policies (
+    id bigserial PRIMARY KEY,
+    name character varying(256) NOT NULL,
+    from_category_id bigint,
+    to_category_id bigint,
+    from_account_id bigint,
+    to_account_id bigint,
+    allow_reverse boolean NOT NULL DEFAULT true,
 
-  FOREIGN KEY (from_category_id) REFERENCES openbill_categories (id),
-  FOREIGN KEY (to_category_id) REFERENCES openbill_categories (id),
-  FOREIGN KEY (from_account_id) REFERENCES openbill_accounts (id),
-  FOREIGN KEY (to_account_id) REFERENCES openbill_accounts (id)
+    FOREIGN KEY (from_category_id) REFERENCES openbill_categories (id),
+    FOREIGN KEY (to_category_id) REFERENCES openbill_categories (id),
+    FOREIGN KEY (from_account_id) REFERENCES openbill_accounts (id),
+    FOREIGN KEY (to_account_id) REFERENCES openbill_accounts (id)
 );
 
 COMMENT ON TABLE openbill_policies IS 'Funds transfer policies. Using this table, you can restrict the movement of funds between accounts. For example, allow write-offs from user accounts only to system ones.';
@@ -106,19 +106,19 @@ CREATE UNIQUE INDEX index_openbill_policies_name ON openbill_policies USING btre
 INSERT INTO openbill_policies (name) VALUES ('Allow any transactions');
 
 CREATE TABLE openbill_holds (
-  id              bigserial PRIMARY KEY,
-  date            date DEFAULT current_date NOT NULL,
-  created_at      timestamp without time zone DEFAULT current_timestamp,
-  account_id bigint NOT NULL,
-  amount_value    numeric(36,18) NOT NULL,
-  amount_currency character varying(8) NOT NULL DEFAULT 'USD',
-  idempotency_key             character varying(256) UNIQUE NOT NULL,
-  details         text NOT NULL,
-  meta            jsonb NOT NULL DEFAULT '{}'::jsonb,
-  hold_key   character varying(256),
-  FOREIGN KEY (hold_key) REFERENCES openbill_holds (idempotency_key) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  FOREIGN KEY (account_id) REFERENCES openbill_accounts (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CHECK ((amount_value < 0 AND hold_key IS NOT NULL) OR (amount_value >0 AND hold_key IS NULL))
+    id bigserial PRIMARY KEY,
+    date date DEFAULT current_date NOT NULL,
+    created_at timestamp without time zone DEFAULT current_timestamp,
+    account_id bigint NOT NULL,
+    amount_value numeric(36, 18) NOT NULL,
+    amount_currency character varying(8) NOT NULL DEFAULT 'USD',
+    idempotency_key character varying(256) UNIQUE NOT NULL,
+    details text NOT NULL,
+    meta jsonb NOT NULL DEFAULT '{}'::jsonb,
+    hold_key character varying(256),
+    FOREIGN KEY (hold_key) REFERENCES openbill_holds (idempotency_key) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    FOREIGN KEY (account_id) REFERENCES openbill_accounts (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CHECK ((amount_value < 0 AND hold_key IS NOT NULL) OR (amount_value > 0 AND hold_key IS NULL))
 );
 
 CREATE INDEX index_holds_on_meta ON openbill_holds USING gin (meta);

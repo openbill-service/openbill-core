@@ -33,4 +33,4 @@ $restrict_transfer$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS restrict_transfer ON openbill_transfers;
 CREATE TRIGGER restrict_transfer
-  AFTER INSERT ON openbill_transfers FOR EACH ROW EXECUTE PROCEDURE restrict_transfer();
+AFTER INSERT ON openbill_transfers FOR EACH ROW EXECUTE PROCEDURE restrict_transfer();

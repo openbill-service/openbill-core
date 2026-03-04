@@ -9,4 +9,4 @@ $notify_transfer$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS notify_transfer ON openbill_transfers;
 CREATE TRIGGER notify_transfer
-  AFTER INSERT ON openbill_transfers FOR EACH ROW EXECUTE PROCEDURE notify_transfer();
+AFTER INSERT ON openbill_transfers FOR EACH ROW EXECUTE PROCEDURE notify_transfer();

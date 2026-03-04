@@ -73,6 +73,9 @@
 
 * SQL-ключевые слова пишутся в `UPPERCASE` (`SELECT`, `INSERT`, `UPDATE`, `WHERE`, `RETURN` и т.д.).
 * Некавыченные идентификаторы пишутся в `lower_snake_case` (`openbill_accounts`, `from_account_id`).
+* Базовая раскладка SQL тоже проверяется (`LT01`, `LT02`, `LT08`): пробелы, отступы, перенос после `WITH`.
+
+Исключение: `tests/bench/scenarios/*.sql` намеренно исключены из strict-layout проверки в `.sqlfluffignore`, так как используют `psql`-переменные вида `:var`.
 
 Локальные команды:
 
@@ -361,6 +364,16 @@ openbill=# LISTEN openbill_transfers;
 
 Больше примеров тут – `./tests/*`
 
+## Каталог use cases (categories + policies)
+
+Если нужно быстро выбрать рабочую схему ограничений переводов под свой продукт:
+
+* Каталог сценариев: [`docs/use-cases.md`](docs/use-cases.md)
+* Готовые SQL-примеры: [`docs/use-cases.sql`](docs/use-cases.sql)
+
+Важно: перед включением своих ограничений обычно удаляют дефолтную политику
+`Allow any transactions`, иначе она разрешит любые маршруты.
+
 ## Контроль доступа
 
 Типовой пользователь PostgreSQL (роль `public`) имеет ограниченный доступ к таблицам.
@@ -427,23 +440,46 @@ PGUSER=postgres PGDATABASE=openbill_test ruby ./parallel_tests.rb \
 
 ## Бенчмарк transfers (pgbench)
 
-Новый скрипт `tests/benchmark_transfers.sh` запускает воспроизводимый benchmark
-по сценариям `hot_pair`, `account_pool`, `hold_cycle` и формирует отчёт
-(`summary.json`, `samples.csv`, `report.md`) с метриками и характеристиками машины.
+Рекомендуется запускать benchmark напрямую через `pgbench` и custom SQL-сценарии:
 
-Пример:
+- `tests/bench/scenarios/hot_pair.sql`
+- `tests/bench/scenarios/account_pool.sql`
+- `tests/bench/scenarios/hold_cycle.sql`
+
+Пример запуска (`hot_pair`):
 
 ```shell
-./tests/benchmark_transfers.sh \
-  --scenario hot_pair \
-  --clients 64 \
-  --threads 8 \
-  --duration 120 \
-  --warmup 20 \
-  --repeats 3
+PGHOST=127.0.0.1 PGUSER=openbill-test PGPASSWORD=postgres PGDATABASE=openbill_test \
+pgbench -n -M prepared -l \
+  --log-prefix ./log/pgbench-direct/hot_pair/pgbench_log \
+  -f ./tests/bench/scenarios/hot_pair.sql \
+  -D hot_from=1 -D hot_to=2 -D max_amount=1000 \
+  -c 16 -j 4 -T 15
 ```
 
-Артефакты запуска сохраняются в каталог `log/benchmarks/<run_id>/`.
+Артефакты запуска сохраняются, например, в каталог `./log/pgbench-direct/`.
+
+## Краткий отчёт по бенчмарку (2026-03-04)
+
+Профиль запуска:
+
+- `clients=16`, `threads=4`, `warmup=5s`, `measure=15s`
+- PostgreSQL `17.4`
+- Хост: `Intel i7-2600K`, `8 vCPU`, `31Gi RAM`
+
+Результаты:
+
+| Сценарий | TPS | p95 latency | Ошибки |
+|---|---:|---:|---:|
+| `hot_pair` | 339.196934 | 147.327 ms | 0 |
+| `account_pool` | 2074.320544 | 14.791 ms | 0 |
+| `hold_cycle` | 68.129177 | 614.437 ms | 0 |
+
+Проверка инварианта баланса после прогонов:
+
+- `sum(amount_value) + sum(hold_value) = 0.000000000000000000`
+
+Полный отчёт: `docs/pgbench_benchmark_report_2026-03-04.md`.
 
 # Прочее
 
