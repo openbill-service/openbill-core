@@ -27,3 +27,5 @@ jobs:
       uses: actions/checkout@v2
     - name: Make tests
       run: ./run_all_tests.sh
+    - name: Make examples tests
+      run: ./test-examples.sh

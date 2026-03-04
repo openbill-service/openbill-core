@@ -1,5 +1,5 @@
 site_name: Openbill Core Docs
-site_description: Документация Openbill Core
+site_description: Openbill Core: Надежный биллинг на уровне базы данных.
 site_url: https://openbill-service.github.io/openbill-core/
 repo_url: https://github.com/openbill-service/openbill-core
 repo_name: openbill-service/openbill-core
