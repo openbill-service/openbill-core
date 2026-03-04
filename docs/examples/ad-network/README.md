@@ -8,16 +8,16 @@ Status: ready
 
 ## Categories
 
-- `AdvertiserDeposit`
-- `CampaignEscrow`
-- `PublisherPayout`
-- `NetworkFee`
+- `AdvertiserDeposit` — депозитный счёт рекламодателя.
+- `CampaignEscrow` — эскроу-счёт кампании.
+- `PublisherPayout` — счёт выплат паблишеру.
+- `NetworkFee` — счёт сетевых/инфраструктурных комиссий.
 
 ## Policies
 
-- `AdvertiserDeposit -> CampaignEscrow` (`allow_reverse = false`)
-- `CampaignEscrow -> PublisherPayout` (`allow_reverse = false`)
-- `CampaignEscrow -> NetworkFee` (`allow_reverse = false`)
+- `AdvertiserDeposit -> CampaignEscrow` (`невозвращаемые`) — разрешён перевод из категории `AdvertiserDeposit` в категорию `CampaignEscrow` в рамках сценария.
+- `CampaignEscrow -> PublisherPayout` (`невозвращаемые`) — разрешён перевод из категории `CampaignEscrow` в категорию `PublisherPayout` в рамках сценария.
+- `CampaignEscrow -> NetworkFee` (`невозвращаемые`) — разрешён перевод из категории `CampaignEscrow` в категорию `NetworkFee` в рамках сценария.
 
 ## Typical Operations
 

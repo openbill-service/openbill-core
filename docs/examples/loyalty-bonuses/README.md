@@ -8,16 +8,16 @@ Status: ready
 
 ## Categories
 
-- `BonusLiability`
-- `UserBonusWallet`
-- `RedemptionSink`
-- `ExpiredBonusIncome`
+- `BonusLiability` — счёт обязательств по бонусам.
+- `UserBonusWallet` — бонусный кошелёк пользователя.
+- `RedemptionSink` — счёт списания бонусов при использовании.
+- `ExpiredBonusIncome` — счёт дохода от сгоревших бонусов.
 
 ## Policies
 
-- `BonusLiability -> UserBonusWallet` (`allow_reverse = false`)
-- `UserBonusWallet -> RedemptionSink` (`allow_reverse = false`)
-- `BonusLiability -> ExpiredBonusIncome` (`allow_reverse = false`)
+- `BonusLiability -> UserBonusWallet` (`невозвращаемые`) — разрешён перевод из категории `BonusLiability` в категорию `UserBonusWallet` в рамках сценария.
+- `UserBonusWallet -> RedemptionSink` (`невозвращаемые`) — разрешён перевод из категории `UserBonusWallet` в категорию `RedemptionSink` в рамках сценария.
+- `BonusLiability -> ExpiredBonusIncome` (`невозвращаемые`) — разрешён перевод из категории `BonusLiability` в категорию `ExpiredBonusIncome` в рамках сценария.
 
 ## Typical Operations
 

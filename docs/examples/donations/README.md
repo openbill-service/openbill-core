@@ -8,16 +8,16 @@ Status: ready
 
 ## Categories
 
-- `Donor`
-- `CampaignEscrow`
-- `Beneficiary`
-- `PlatformFee`
+- `Donor` — счёт донора.
+- `CampaignEscrow` — эскроу-счёт кампании.
+- `Beneficiary` — счёт бенефициара.
+- `PlatformFee` — счёт комиссии платформы.
 
 ## Policies
 
-- `Donor -> CampaignEscrow` (`allow_reverse = true`)
-- `CampaignEscrow -> Beneficiary` (`allow_reverse = false`)
-- `CampaignEscrow -> PlatformFee` (`allow_reverse = false`)
+- `Donor -> CampaignEscrow` (`возвращаемые`) — разрешён перевод из категории `Donor` в категорию `CampaignEscrow` в рамках сценария.
+- `CampaignEscrow -> Beneficiary` (`невозвращаемые`) — разрешён перевод из категории `CampaignEscrow` в категорию `Beneficiary` в рамках сценария.
+- `CampaignEscrow -> PlatformFee` (`невозвращаемые`) — разрешён перевод из категории `CampaignEscrow` в категорию `PlatformFee` в рамках сценария.
 
 ## Typical Operations
 

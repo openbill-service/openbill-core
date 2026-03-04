@@ -9,18 +9,18 @@ Status: ready
 
 ## Categories
 
-- `ExternalClearing`
-- `ClientAccount`
-- `CardSettlement`
-- `BankFeeIncome`
-- `LoanRepayment`
+- `ExternalClearing` — внешний расчётный счёт.
+- `ClientAccount` — клиентский счёт.
+- `CardSettlement` — счёт карточных расчётов.
+- `BankFeeIncome` — счёт доходов от банковских комиссий.
+- `LoanRepayment` — счёт погашения кредита.
 
 ## Policies
 
-- `ExternalClearing -> ClientAccount` (`allow_reverse = true`)
-- `ClientAccount -> CardSettlement` (`allow_reverse = false`)
-- `ClientAccount -> BankFeeIncome` (`allow_reverse = false`)
-- `ClientAccount -> LoanRepayment` (`allow_reverse = false`)
+- `ExternalClearing -> ClientAccount` (`возвращаемые`) — разрешён перевод из категории `ExternalClearing` в категорию `ClientAccount` в рамках сценария.
+- `ClientAccount -> CardSettlement` (`невозвращаемые`) — разрешён перевод из категории `ClientAccount` в категорию `CardSettlement` в рамках сценария.
+- `ClientAccount -> BankFeeIncome` (`невозвращаемые`) — разрешён перевод из категории `ClientAccount` в категорию `BankFeeIncome` в рамках сценария.
+- `ClientAccount -> LoanRepayment` (`невозвращаемые`) — разрешён перевод из категории `ClientAccount` в категорию `LoanRepayment` в рамках сценария.
 
 ## Typical Operations
 

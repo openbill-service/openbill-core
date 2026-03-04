@@ -8,14 +8,14 @@ Status: ready
 
 ## Categories
 
-- `GiftLiability`
-- `UserWallet`
-- `BreakageIncome`
+- `GiftLiability` — счёт обязательств по подарочным картам.
+- `UserWallet` — кошелёк пользователя.
+- `BreakageIncome` — счёт дохода от неиспользованных gift card.
 
 ## Policies
 
-- `GiftLiability -> UserWallet` (`allow_reverse = false`)
-- `GiftLiability -> BreakageIncome` (`allow_reverse = false`)
+- `GiftLiability -> UserWallet` (`невозвращаемые`) — разрешён перевод из категории `GiftLiability` в категорию `UserWallet` в рамках сценария.
+- `GiftLiability -> BreakageIncome` (`невозвращаемые`) — разрешён перевод из категории `GiftLiability` в категорию `BreakageIncome` в рамках сценария.
 
 ## Typical Operations
 

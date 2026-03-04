@@ -8,16 +8,16 @@ Prepaid-контур телекома: пополнение абонента, п
 
 ## Categories
 
-- `TopupSource`
-- `SubscriberWallet`
-- `ServiceConsumption`
-- `TelecomFee`
+- `TopupSource` — внешний источник пополнения.
+- `SubscriberWallet` — кошелёк абонента.
+- `ServiceConsumption` — счёт списаний за услуги.
+- `TelecomFee` — счёт комиссии оператора.
 
 ## Policies
 
-- `TopupSource -> SubscriberWallet` (`allow_reverse = true`)
-- `SubscriberWallet -> ServiceConsumption` (`allow_reverse = false`)
-- `SubscriberWallet -> TelecomFee` (`allow_reverse = false`)
+- `TopupSource -> SubscriberWallet` (`возвращаемые`) — разрешён перевод из категории `TopupSource` в категорию `SubscriberWallet` в рамках сценария.
+- `SubscriberWallet -> ServiceConsumption` (`невозвращаемые`) — разрешён перевод из категории `SubscriberWallet` в категорию `ServiceConsumption` в рамках сценария.
+- `SubscriberWallet -> TelecomFee` (`невозвращаемые`) — разрешён перевод из категории `SubscriberWallet` в категорию `TelecomFee` в рамках сценария.
 
 ## Typical Operations
 

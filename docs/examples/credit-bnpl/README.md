@@ -8,18 +8,18 @@ Status: ready
 
 ## Categories
 
-- `LenderFund`
-- `BorrowerAccount`
-- `PrincipalRepayment`
-- `InterestIncome`
-- `PenaltyIncome`
+- `LenderFund` — счёт фонда кредитора.
+- `BorrowerAccount` — счёт заёмщика.
+- `PrincipalRepayment` — счёт погашения основного долга.
+- `InterestIncome` — счёт процентного дохода.
+- `PenaltyIncome` — счёт дохода от штрафов.
 
 ## Policies
 
-- `LenderFund -> BorrowerAccount` (`allow_reverse = false`)
-- `BorrowerAccount -> PrincipalRepayment` (`allow_reverse = false`)
-- `BorrowerAccount -> InterestIncome` (`allow_reverse = false`)
-- `BorrowerAccount -> PenaltyIncome` (`allow_reverse = false`)
+- `LenderFund -> BorrowerAccount` (`невозвращаемые`) — разрешён перевод из категории `LenderFund` в категорию `BorrowerAccount` в рамках сценария.
+- `BorrowerAccount -> PrincipalRepayment` (`невозвращаемые`) — разрешён перевод из категории `BorrowerAccount` в категорию `PrincipalRepayment` в рамках сценария.
+- `BorrowerAccount -> InterestIncome` (`невозвращаемые`) — разрешён перевод из категории `BorrowerAccount` в категорию `InterestIncome` в рамках сценария.
+- `BorrowerAccount -> PenaltyIncome` (`невозвращаемые`) — разрешён перевод из категории `BorrowerAccount` в категорию `PenaltyIncome` в рамках сценария.
 
 ## Typical Operations
 

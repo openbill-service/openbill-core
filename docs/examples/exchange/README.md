@@ -8,19 +8,19 @@ Status: ready
 
 ## Categories
 
-- `User_USD`
-- `User_BTC`
-- `ExchangeVault_USD`
-- `ExchangeVault_BTC`
-- `Fee_USD`
-- `Fee_BTC`
+- `User_USD` — USD-счёт пользователя.
+- `User_BTC` — BTC-счёт пользователя.
+- `ExchangeVault_USD` — USD-резерв (vault) биржи.
+- `ExchangeVault_BTC` — BTC-резерв (vault) биржи.
+- `Fee_USD` — USD-счёт комиссий биржи.
+- `Fee_BTC` — BTC-счёт комиссий биржи.
 
 ## Policies
 
-- `User_USD -> ExchangeVault_USD` (`allow_reverse = true`)
-- `ExchangeVault_BTC -> User_BTC` (`allow_reverse = false`)
-- `User_USD -> Fee_USD` (`allow_reverse = false`)
-- `User_BTC -> Fee_BTC` (`allow_reverse = false`)
+- `User_USD -> ExchangeVault_USD` (`возвращаемые`) — разрешён перевод из категории `User_USD` в категорию `ExchangeVault_USD` в рамках сценария.
+- `ExchangeVault_BTC -> User_BTC` (`невозвращаемые`) — разрешён перевод из категории `ExchangeVault_BTC` в категорию `User_BTC` в рамках сценария.
+- `User_USD -> Fee_USD` (`невозвращаемые`) — разрешён перевод из категории `User_USD` в категорию `Fee_USD` в рамках сценария.
+- `User_BTC -> Fee_BTC` (`невозвращаемые`) — разрешён перевод из категории `User_BTC` в категорию `Fee_BTC` в рамках сценария.
 
 ## Typical Operations
 

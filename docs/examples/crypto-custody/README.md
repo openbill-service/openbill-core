@@ -8,18 +8,18 @@ Status: ready
 
 ## Categories
 
-- `OnchainHot`
-- `UserCustody`
-- `WithdrawalQueue`
-- `ComplianceHold`
-- `NetworkFee`
+- `OnchainHot` — горячий on-chain счёт.
+- `UserCustody` — кастодиальный счёт пользователя.
+- `WithdrawalQueue` — очередь вывода средств.
+- `ComplianceHold` — счёт комплаенс-блокировок.
+- `NetworkFee` — счёт сетевых/инфраструктурных комиссий.
 
 ## Policies
 
-- `OnchainHot -> UserCustody` (`allow_reverse = true`)
-- `UserCustody -> WithdrawalQueue` (`allow_reverse = false`)
-- `UserCustody -> ComplianceHold` (`allow_reverse = false`)
-- `UserCustody -> NetworkFee` (`allow_reverse = false`)
+- `OnchainHot -> UserCustody` (`возвращаемые`) — разрешён перевод из категории `OnchainHot` в категорию `UserCustody` в рамках сценария.
+- `UserCustody -> WithdrawalQueue` (`невозвращаемые`) — разрешён перевод из категории `UserCustody` в категорию `WithdrawalQueue` в рамках сценария.
+- `UserCustody -> ComplianceHold` (`невозвращаемые`) — разрешён перевод из категории `UserCustody` в категорию `ComplianceHold` в рамках сценария.
+- `UserCustody -> NetworkFee` (`невозвращаемые`) — разрешён перевод из категории `UserCustody` в категорию `NetworkFee` в рамках сценария.
 
 ## Typical Operations
 

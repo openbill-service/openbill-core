@@ -8,14 +8,14 @@ Status: ready
 
 ## Categories
 
-- `Revenue`
-- `AffiliatePayable`
-- `AffiliateWallet`
+- `Revenue` — счёт выручки.
+- `AffiliatePayable` — счёт начислений партнёрам (к выплате).
+- `AffiliateWallet` — кошелёк партнёра.
 
 ## Policies
 
-- `Revenue -> AffiliatePayable` (`allow_reverse = false`)
-- `AffiliatePayable -> AffiliateWallet` (`allow_reverse = false`)
+- `Revenue -> AffiliatePayable` (`невозвращаемые`) — разрешён перевод из категории `Revenue` в категорию `AffiliatePayable` в рамках сценария.
+- `AffiliatePayable -> AffiliateWallet` (`невозвращаемые`) — разрешён перевод из категории `AffiliatePayable` в категорию `AffiliateWallet` в рамках сценария.
 
 ## Typical Operations
 

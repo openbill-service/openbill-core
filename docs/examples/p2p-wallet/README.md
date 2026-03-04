@@ -8,16 +8,16 @@ Status: ready
 
 ## Categories
 
-- `UserWallet`
-- `TopupSource`
-- `WithdrawalSink`
-- `PlatformFee`
+- `UserWallet` — кошелёк пользователя.
+- `TopupSource` — внешний источник пополнения.
+- `WithdrawalSink` — счёт вывода средств.
+- `PlatformFee` — счёт комиссии платформы.
 
 ## Policies
 
-- `TopupSource -> UserWallet` (`allow_reverse = true`)
-- `UserWallet -> WithdrawalSink` (`allow_reverse = false`)
-- `UserWallet -> PlatformFee` (`allow_reverse = false`)
+- `TopupSource -> UserWallet` (`возвращаемые`) — разрешён перевод из категории `TopupSource` в категорию `UserWallet` в рамках сценария.
+- `UserWallet -> WithdrawalSink` (`невозвращаемые`) — разрешён перевод из категории `UserWallet` в категорию `WithdrawalSink` в рамках сценария.
+- `UserWallet -> PlatformFee` (`невозвращаемые`) — разрешён перевод из категории `UserWallet` в категорию `PlatformFee` в рамках сценария.
 
 ## Typical Operations
 
