@@ -1,0 +1,13 @@
+[tools]
+node = "20"
+ruby = "3.4.8"
+yarn = "1"
+"pipx:sqlfluff" = "3.4.1"
+
+[tasks.lint]
+description = "Lint SQL migrations with sqlfluff"
+run = "sqlfluff lint --config .sqlfluff migrations/"
+
+[tasks.fix]
+description = "Auto-fix SQL migrations with sqlfluff"
+run = "sqlfluff fix --config .sqlfluff migrations/"

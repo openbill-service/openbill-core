@@ -80,8 +80,8 @@
 Локальные команды:
 
 ```shell
-./scripts/sql_lint.sh
-./scripts/sql_fix.sh
+mise run lint
+mise run fix
 ```
 
 `pre-commit`:
