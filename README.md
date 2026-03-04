@@ -2,6 +2,8 @@
 
 [![Build Status](https://github.com/openbill-service/openbill-core/actions/workflows/github-actions-func.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions)
 
+Документация (MkDocs Material): https://openbill-service.github.io/openbill-core/
+
 Ядро простого и надежного биллинга на хранимых процедурах для PostgreSQL.
 
 Создан по принципу: "Меньше функций - больше надежности".
