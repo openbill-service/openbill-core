@@ -29,11 +29,15 @@ Openbill Core реализует финансовый учёт напрямую 
 - Детерминированное поведение: проверки идут в той же консистентной границе, что и запись.
 - Прозрачная трассировка операций через таблицы ledger.
 
-## Быстрый Старт (Для Пользователей)
+## Зависимости
 
-Требования:
+Нужна только одна зависимость:
 
 - PostgreSQL 13+
+
+Для ядра больше ничего не требуется: ни отдельный API-сервис, ни SDK, ни дополнительный рантайм.
+
+## Быстрый Старт (Для Пользователей)
 
 Инициализация тестовой БД:
 
@@ -44,16 +48,31 @@ Openbill Core реализует финансовый учёт напрямую 
 Минимальный сценарий:
 
 ```sql
--- 1) Создаём два счёта и перевод между ними
+-- 1) Создаём два счёта
+INSERT INTO openbill_accounts (category_id, details)
+VALUES (-1, 'User wallet (readme)');
+
+INSERT INTO openbill_accounts (category_id, details)
+VALUES (-1, 'System income (readme)');
+
+-- 2) Проверяем балансы до перевода
+SELECT id, details, amount_value, amount_currency
+FROM openbill_accounts
+WHERE details IN ('User wallet (readme)', 'System income (readme)')
+ORDER BY id;
+
+-- 3) Регистрируем перевод
 WITH user_wallet AS (
-  INSERT INTO openbill_accounts (category_id, details)
-  VALUES (-1, 'User wallet (readme)')
-  RETURNING id
+  SELECT id FROM openbill_accounts
+  WHERE details = 'User wallet (readme)'
+  ORDER BY id DESC
+  LIMIT 1
 ),
 system_income AS (
-  INSERT INTO openbill_accounts (category_id, details)
-  VALUES (-1, 'System income (readme)')
-  RETURNING id
+  SELECT id FROM openbill_accounts
+  WHERE details = 'System income (readme)'
+  ORDER BY id DESC
+  LIMIT 1
 )
 INSERT INTO openbill_transfers
   (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
@@ -67,13 +86,13 @@ SELECT
 FROM user_wallet uw, system_income si
 RETURNING id, from_account_id, to_account_id, amount_value, amount_currency;
 
--- 2) Проверяем балансы после перевода
+-- 4) Проверяем балансы после перевода
 SELECT id, details, amount_value, amount_currency
 FROM openbill_accounts
 WHERE details IN ('User wallet (readme)', 'System income (readme)')
 ORDER BY id;
 
--- 3) Проверяем инвариант
+-- 5) Проверяем инвариант
 SELECT amount_currency, SUM(amount_value)
 FROM openbill_accounts
 GROUP BY amount_currency;

@@ -29,11 +29,15 @@ Openbill Core implements financial accounting directly in PostgreSQL.
 - Deterministic behavior: checks run at the same consistency boundary as writes.
 - Transparent traceability through ledger tables.
 
-## Quick Start (Project Users)
+## Dependencies
 
-Requirements:
+Only one dependency:
 
 - PostgreSQL 13+
+
+Nothing else is required for the core: no separate API service, SDK, or extra runtime.
+
+## Quick Start (Project Users)
 
 Initialize the test database:
 
@@ -44,16 +48,31 @@ Initialize the test database:
 Minimal scenario:
 
 ```sql
--- 1) Create two accounts and transfer between them
+-- 1) Create two accounts
+INSERT INTO openbill_accounts (category_id, details)
+VALUES (-1, 'User wallet (readme)');
+
+INSERT INTO openbill_accounts (category_id, details)
+VALUES (-1, 'System income (readme)');
+
+-- 2) Check balances before transfer
+SELECT id, details, amount_value, amount_currency
+FROM openbill_accounts
+WHERE details IN ('User wallet (readme)', 'System income (readme)')
+ORDER BY id;
+
+-- 3) Register a transfer
 WITH user_wallet AS (
-  INSERT INTO openbill_accounts (category_id, details)
-  VALUES (-1, 'User wallet (readme)')
-  RETURNING id
+  SELECT id FROM openbill_accounts
+  WHERE details = 'User wallet (readme)'
+  ORDER BY id DESC
+  LIMIT 1
 ),
 system_income AS (
-  INSERT INTO openbill_accounts (category_id, details)
-  VALUES (-1, 'System income (readme)')
-  RETURNING id
+  SELECT id FROM openbill_accounts
+  WHERE details = 'System income (readme)'
+  ORDER BY id DESC
+  LIMIT 1
 )
 INSERT INTO openbill_transfers
   (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
@@ -67,13 +86,13 @@ SELECT
 FROM user_wallet uw, system_income si
 RETURNING id, from_account_id, to_account_id, amount_value, amount_currency;
 
--- 2) Check account balances after transfer
+-- 4) Check balances after transfer
 SELECT id, details, amount_value, amount_currency
 FROM openbill_accounts
 WHERE details IN ('User wallet (readme)', 'System income (readme)')
 ORDER BY id;
 
--- 3) Verify the invariant
+-- 5) Verify the invariant
 SELECT amount_currency, SUM(amount_value)
 FROM openbill_accounts
 GROUP BY amount_currency;
