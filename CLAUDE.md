@@ -34,7 +34,7 @@ guard
 
 ### Принцип двойной записи
 
-Баланс системы (сумма `amount_value` всех счетов) всегда равен нулю. Каждая транзакция списывает с `from_account_id` и зачисляет на `to_account_id`. Это инвариант, проверяемый после каждого теста (`tests/assert_balance.sh`).
+Баланс системы (сумма `balance` всех счетов) всегда равен нулю. Каждая транзакция списывает с `from_account_id` и зачисляет на `to_account_id`. Это инвариант, проверяемый после каждого теста (`tests/assert_balance.sh`).
 
 ### Миграции (`migrations/`)
 
@@ -49,7 +49,7 @@ guard
 | Таблица | Назначение |
 |-|-|
 | `OPENBILL_CATEGORIES` | Группировка счетов (bigserial PK) |
-| `OPENBILL_ACCOUNTS` | Счета с балансом (`amount_value`/`amount_currency`), поле `kind`: negative/positive/any |
+| `OPENBILL_ACCOUNTS` | Счета с балансом (`balance`/`currency`), поле `kind`: negative/positive/any |
 | `OPENBILL_TRANSFERS` | Операции перемещения средств. `INSERT` — единственный способ создать транзакцию |
 | `OPENBILL_POLICIES` | Ограничения на допустимые направления переводов между категориями/счетами |
 | `OPENBILL_HOLDS` | Блокировка средств на счёте |

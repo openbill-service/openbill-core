@@ -49,7 +49,7 @@ INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'System income'
 
 ```sql
 INSERT INTO openbill_transfers
-  (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
+  (from_account_id, to_account_id, amount, currency, idempotency_key, details)
 VALUES
   (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment');
 ```
@@ -59,9 +59,9 @@ VALUES
 ## 5. Проверить инвариант
 
 ```sql
-SELECT amount_currency, SUM(amount_value)
+SELECT currency, SUM(balance)
 FROM openbill_accounts
-GROUP BY amount_currency;
+GROUP BY currency;
 ```
 
 Сумма по каждой валюте должна быть `0`.
@@ -72,7 +72,7 @@ GROUP BY amount_currency;
 
 ```sql
 INSERT INTO openbill_transfers
-  (reverse_transaction_id, from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
+  (reverse_transaction_id, from_account_id, to_account_id, amount, currency, idempotency_key, details)
 VALUES
   (1, 1, 2, 500, 'USD', 'refund:demo:1', 'Refund for demo payment');
 ```
@@ -83,7 +83,7 @@ VALUES
 
 ```sql
 INSERT INTO openbill_holds
-  (account_id, amount_value, amount_currency, idempotency_key, details)
+  (account_id, amount, currency, idempotency_key, details)
 VALUES
   (1, 200, 'USD', 'hold:order:1', 'Reserve');
 ```
@@ -92,7 +92,7 @@ VALUES
 
 ```sql
 INSERT INTO openbill_holds
-  (account_id, amount_value, amount_currency, idempotency_key, hold_key, details)
+  (account_id, amount, currency, idempotency_key, hold_key, details)
 VALUES
   (1, -200, 'USD', 'unhold:order:1', 'hold:order:1', 'Unreserve');
 ```

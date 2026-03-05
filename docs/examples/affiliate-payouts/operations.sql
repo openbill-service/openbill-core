@@ -24,20 +24,20 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Step 2: transfer Revenue -> AffiliatePayable
 INSERT INTO openbill_transfers
-  (id, from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
+  (id, from_account_id, to_account_id, amount, currency, idempotency_key, details)
 VALUES
   (-810101, -810001, -810002, 1000, 'USD', 'demo:affiliate-payouts:t01', 'Affiliate flow: Revenue -> AffiliatePayable')
 ON CONFLICT DO NOTHING;
 
 -- Step 3: transfer AffiliatePayable -> AffiliateWallet
 INSERT INTO openbill_transfers
-  (id, from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
+  (id, from_account_id, to_account_id, amount, currency, idempotency_key, details)
 VALUES
   (-810102, -810002, -810003, 100, 'USD', 'demo:affiliate-payouts:t02', 'Affiliate flow: AffiliatePayable -> AffiliateWallet')
 ON CONFLICT DO NOTHING;
 
 -- Blocked example (should fail with: No policy for this transfer)
 -- INSERT INTO openbill_transfers
---   (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
+--   (from_account_id, to_account_id, amount, currency, idempotency_key, details)
 -- VALUES
 --   (-810002, -810001, 50, 'USD', 'demo:affiliate-payouts:blocked', 'Blocked route example');

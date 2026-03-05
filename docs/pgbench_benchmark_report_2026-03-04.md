@@ -85,7 +85,7 @@ pgbench -n -M prepared -l \
 
 Проверка инварианта баланса Openbill после прогона:
 
-- `sum(amount_value) + sum(hold_value) = 0.000000000000000000`
+- `sum(balance) + sum(hold_amount) = 0.000000000000000000`
 
 ## Артефакты
 

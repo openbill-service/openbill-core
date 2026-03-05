@@ -13,8 +13,8 @@
 | `created_at` | `timestamp` | нет | `current_timestamp` | Время записи |
 | `from_account_id` | `bigint` | да | - | Счёт-источник |
 | `to_account_id` | `bigint` | да | - | Счёт-получатель |
-| `amount_value` | `numeric(36,18)` | да | - | Сумма (> 0) |
-| `amount_currency` | `varchar(8)` | да | `USD` | Валюта трансфера |
+| `amount` | `numeric(36,18)` | да | - | Сумма (> 0) |
+| `currency` | `varchar(8)` | да | `USD` | Валюта трансфера |
 | `idempotency_key` | `varchar(256)` | да | - | Уникальный ключ идемпотентности |
 | `details` | `text` | да | - | Описание |
 | `meta` | `jsonb` | да | `{}` | Метаданные |
@@ -22,7 +22,7 @@
 
 ## Бизнес-правила
 
-- `amount_value > 0`.
+- `amount > 0`.
 - `from_account_id <> to_account_id`.
 - `idempotency_key` уникален.
 - Валюта трансфера должна совпадать с валютой обоих счетов.
@@ -47,8 +47,8 @@
 INSERT INTO openbill_transfers (
   from_account_id,
   to_account_id,
-  amount_value,
-  amount_currency,
+  amount,
+  currency,
   idempotency_key,
   details
 )
@@ -70,8 +70,8 @@ INSERT INTO openbill_transfers (
   reverse_transaction_id,
   from_account_id,
   to_account_id,
-  amount_value,
-  amount_currency,
+  amount,
+  currency,
   idempotency_key,
   details
 )

@@ -32,9 +32,9 @@ erDiagram
     openbill_accounts {
       bigint id PK
       bigint category_id FK
-      numeric amount_value
-      varchar amount_currency
-      numeric hold_value
+      numeric balance
+      varchar currency
+      numeric hold_amount
       account_kind kind
       timestamp locked_at
     }
@@ -43,8 +43,8 @@ erDiagram
       bigint id PK
       bigint from_account_id FK
       bigint to_account_id FK
-      numeric amount_value
-      varchar amount_currency
+      numeric amount
+      varchar currency
       varchar idempotency_key UK
       bigint reverse_transaction_id FK
     }
@@ -62,8 +62,8 @@ erDiagram
     openbill_holds {
       bigint id PK
       bigint account_id FK
-      numeric amount_value
-      varchar amount_currency
+      numeric amount
+      varchar currency
       varchar idempotency_key UK
       varchar hold_key FK
     }

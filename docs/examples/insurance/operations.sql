@@ -29,27 +29,27 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Step 2: transfer PremiumInflow -> InsuranceReserve
 INSERT INTO openbill_transfers
-  (id, from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
+  (id, from_account_id, to_account_id, amount, currency, idempotency_key, details)
 VALUES
   (-1210101, -1210001, -1210002, 1000, 'USD', 'demo:insurance:t01', 'Insurance flow: PremiumInflow -> InsuranceReserve')
 ON CONFLICT DO NOTHING;
 
 -- Step 3: transfer InsuranceReserve -> ClaimsPayout
 INSERT INTO openbill_transfers
-  (id, from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
+  (id, from_account_id, to_account_id, amount, currency, idempotency_key, details)
 VALUES
   (-1210102, -1210002, -1210003, 100, 'USD', 'demo:insurance:t02', 'Insurance flow: InsuranceReserve -> ClaimsPayout')
 ON CONFLICT DO NOTHING;
 
 -- Step 4: transfer InsuranceReserve -> InsuranceFee
 INSERT INTO openbill_transfers
-  (id, from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
+  (id, from_account_id, to_account_id, amount, currency, idempotency_key, details)
 VALUES
   (-1210103, -1210002, -1210004, 10, 'USD', 'demo:insurance:t03', 'Insurance flow: InsuranceReserve -> InsuranceFee')
 ON CONFLICT DO NOTHING;
 
 -- Blocked example (should fail with: No policy for this transfer)
 -- INSERT INTO openbill_transfers
---   (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
+--   (from_account_id, to_account_id, amount, currency, idempotency_key, details)
 -- VALUES
 --   (-1210002, -1210001, 50, 'USD', 'demo:insurance:blocked', 'Blocked route example');

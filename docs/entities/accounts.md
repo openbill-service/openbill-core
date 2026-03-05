@@ -2,7 +2,7 @@
 
 ## Назначение
 
-`openbill_accounts` хранит текущее состояние счёта: баланс, валюту, категорию, тип счёта и технические атрибуты (`hold_value`, `transactions_count`, `locked_at`).
+`openbill_accounts` хранит текущее состояние счёта: баланс, валюту, категорию, тип счёта и технические атрибуты (`hold_amount`, `transactions_count`, `locked_at`).
 
 ## Схема
 
@@ -10,12 +10,12 @@
 | --- | --- | --- | --- | --- |
 | `id` | `bigserial` | да | sequence | Идентификатор счёта |
 | `category_id` | `bigint` | да | - | Ссылка на `openbill_categories.id` |
-| `amount_value` | `numeric(36,18)` | да | `0` | Текущий баланс |
-| `amount_currency` | `varchar(8)` | да | `USD` | Валюта счёта |
+| `balance` | `numeric(36,18)` | да | `0` | Текущий баланс |
+| `currency` | `varchar(8)` | да | `USD` | Валюта счёта |
 | `details` | `text` | нет | `NULL` | Описание |
 | `transactions_count` | `integer` | да | `0` | Количество трансферов по счёту |
 | `meta` | `jsonb` | да | `{}` | Произвольные метаданные |
-| `hold_value` | `numeric(36,18)` | да | `0` | Сумма в удержании (hold) |
+| `hold_amount` | `numeric(36,18)` | да | `0` | Сумма в удержании (hold) |
 | `locked_at` | `timestamp` | нет | `NULL` | Блокировка списаний со счёта |
 | `kind` | `account_kind` | да | `any` | Ограничение на знак баланса |
 | `created_at` | `timestamp` | нет | `current_timestamp` | Время создания |
@@ -24,8 +24,8 @@
 ## Ограничения и инварианты
 
 - `category_id` обязан ссылаться на существующую категорию.
-- `kind = positive` требует `amount_value >= 0`.
-- `kind = negative` требует `amount_value <= 0`.
+- `kind = positive` требует `balance >= 0`.
+- `kind = negative` требует `balance <= 0`.
 - `kind = any` не ограничивает знак.
 - Баланс должен меняться через `transfers`/`holds`, а не прямым `UPDATE` прикладной роли.
 
@@ -33,14 +33,14 @@
 
 Разрешено:
 
-- `INSERT` только в поля: `id, category_id, amount_currency, details, meta, kind`
+- `INSERT` только в поля: `id, category_id, currency, details, meta, kind`
 - `UPDATE` только полей: `locked_at, details`
 - `SELECT`, `DELETE`
 
 Не разрешено напрямую менять:
 
-- `amount_value`
-- `hold_value`
+- `balance`
+- `hold_amount`
 - `transactions_count`
 - `created_at`, `updated_at`
 
@@ -49,7 +49,7 @@
 ### Создать счёт
 
 ```sql
-INSERT INTO openbill_accounts (category_id, amount_currency, details, kind)
+INSERT INTO openbill_accounts (category_id, currency, details, kind)
 VALUES (10, 'USD', 'User wallet', 'positive')
 RETURNING id;
 ```
@@ -74,9 +74,9 @@ WHERE id = 1001;
 SELECT
   id,
   category_id,
-  amount_value,
-  hold_value,
-  amount_currency,
+  balance,
+  hold_amount,
+  currency,
   kind,
   locked_at,
   transactions_count

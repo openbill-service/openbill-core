@@ -63,8 +63,8 @@ All rules are enforced at the PostgreSQL level (constraints, triggers, GRANT). N
 
 Practical integrity guarantees:
 
-- Openbill is multi-currency: balances and invariants are tracked per `amount_currency`.
-- To get an account balance, read `openbill_accounts.amount_value`; no transfer replay is needed.
+- Openbill is multi-currency: balances and invariants are tracked per `currency`.
+- To get an account balance, read `openbill_accounts.balance`; no transfer replay is needed.
 - The sum of balances across all accounts (per currency) is always `0`.
 - This makes money creation from nowhere impossible and prevents unnoticed balance injections.
 
@@ -84,8 +84,8 @@ INSERT INTO openbill_accounts (id, category_id, details) VALUES (1, -1, 'Bob');
 INSERT INTO openbill_accounts (id, category_id, details) VALUES (2, -1, 'Nikolas');
 
 -- 2) Check balances before transfer
-SELECT details, amount_value, amount_currency FROM openbill_accounts;
--- details | amount_value | amount_currency
+SELECT details, balance, currency FROM openbill_accounts;
+-- details | balance | currency
 -- --------+--------------+----------------
 -- Bob     |         0.00 | USD
 -- Nikolas |         0.00 | USD
@@ -95,14 +95,14 @@ INSERT INTO openbill_transfers VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo
 -- Automatic processing: process_account_transfer debits 500 USD from Nikolas and credits 500 USD to Bob (double-entry).
 
 -- 4) Check balances after transfer
-SELECT details, amount_value, amount_currency FROM openbill_accounts;
--- details | amount_value | amount_currency
+SELECT details, balance, currency FROM openbill_accounts;
+-- details | balance | currency
 -- --------+--------------+----------------
 -- Bob     |       500.00 | USD
 -- Nikolas |      -500.00 | USD
 
 -- 5) Verify integrity (sum of all balances is zero)
-SELECT SUM(amount_value) FROM openbill_accounts;
+SELECT SUM(balance) FROM openbill_accounts;
 -- sum
 -- ------
 --  0.00
@@ -170,7 +170,7 @@ Benchmark server: Linux 6.8, Intel Core i7-2600K (8 vCPU), 31 GiB RAM.
 | Contention stress | Transfers only between two hot accounts under high concurrency | 339 |
 
 Invariant check after benchmark:
-`sum(amount_value) + sum(hold_value) = 0.000000000000000000`
+`sum(balance) + sum(hold_amount) = 0.000000000000000000`
 
 ## Key Entities
 

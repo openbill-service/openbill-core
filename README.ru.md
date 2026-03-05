@@ -63,8 +63,8 @@ Openbill Core реализует финансовый учёт напрямую 
 
 Практические гарантии целостности:
 
-- Openbill мультивалютный: балансы и инварианты считаются отдельно по `amount_currency`.
-- Чтобы узнать баланс счета, не нужно пересобирать транзакции: актуальный баланс всегда в `openbill_accounts.amount_value`.
+- Openbill мультивалютный: балансы и инварианты считаются отдельно по `currency`.
+- Чтобы узнать баланс счета, не нужно пересобирать транзакции: актуальный баланс всегда в `openbill_accounts.balance`.
 - Сумма балансов всех счетов (в разрезе валюты) всегда равна `0`.
 - Это исключает возможность «взять деньги из ниоткуда» и сделать незаметное зачисление на баланс.
 
@@ -84,8 +84,8 @@ INSERT INTO openbill_accounts (id, category_id, details) VALUES (1, -1, 'Bob');
 INSERT INTO openbill_accounts (id, category_id, details) VALUES (2, -1, 'Nikolas');
 
 -- 2) Проверяем балансы до перевода
-SELECT details, amount_value, amount_currency FROM openbill_accounts;
--- details | amount_value | amount_currency
+SELECT details, balance, currency FROM openbill_accounts;
+-- details | balance | currency
 -- --------+--------------+----------------
 -- Bob     |         0.00 | USD
 -- Nikolas |         0.00 | USD
@@ -95,14 +95,14 @@ INSERT INTO openbill_transfers VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo
 -- Автообработка: process_account_transfer списывает 500 USD с Nikolas и зачисляет 500 USD на Bob (двойная запись).
 
 -- 4) Проверяем балансы после перевода
-SELECT details, amount_value, amount_currency FROM openbill_accounts;
--- details | amount_value | amount_currency
+SELECT details, balance, currency FROM openbill_accounts;
+-- details | balance | currency
 -- --------+--------------+----------------
 -- Bob     |       500.00 | USD
 -- Nikolas |      -500.00 | USD
 
 -- 5) Проверяем целостность (сумма всех балансов равна нулю)
-SELECT SUM(amount_value) FROM openbill_accounts;
+SELECT SUM(balance) FROM openbill_accounts;
 -- sum
 -- ------
 --  0.00
@@ -170,7 +170,7 @@ SELECT SUM(amount_value) FROM openbill_accounts;
 | Узкое место по блокировкам (`hot_pair`) | Переводы только между двумя \"горячими\" счетами при высокой конкуренции | 339.196934 |
 
 Проверка инварианта после прогона:
-`sum(amount_value) + sum(hold_value) = 0.000000000000000000`
+`sum(balance) + sum(hold_amount) = 0.000000000000000000`
 
 ## Ключевые Сущности
 
