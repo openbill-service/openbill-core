@@ -1,6 +1,4 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# Openbill Core
 
 ## Что это
 
@@ -24,11 +22,23 @@ Openbill Core — биллинговая система на чистом Postgr
 guard
 ```
 
-Тесты используют `PGDATABASE=openbill_test`, `PGUSER=openbill-test`. Настройки в `tests/config.sh`.
+Тесты используют `PGDATABASE=openbill_test`, `PGUSER=openbill-test` (задаётся в `tests/all.sh`). Остальные настройки — в `tests/config.sh`.
+
+> **Важно:** `tests/create.sh` выполняется от суперпользователя PostgreSQL (`PG_SUPERUSER`, по умолчанию `postgres`) — он создаёт/удаляет БД и роль `openbill-test`.
 
 ### Линтинг
 
 Отсутствует.
+
+### Бенчмарки
+
+```bash
+./tests/benchmark_test_scenario0.sh
+```
+
+### CI
+
+GitHub Actions (`.github/workflows/`) — параллельный запуск тестов через `parallel_tests.rb`.
 
 ## Архитектура
 
@@ -73,6 +83,14 @@ guard
 - `locked_at` на счёте блокирует списание с него.
 - Политики (`OPENBILL_POLICIES`) ограничивают допустимые направления переводов.
 - Функции объявлены как `SECURITY DEFINER`.
+
+### Документация (`docs/`)
+
+MkDocs-сайт (`mkdocs.yml`). Включает:
+- `docs/examples/` — 15+ бизнес-сценариев (банк, маркетплейс, платёжная система и др.) с SQL-примерами и тестами
+- `docs/getting-started.md` — быстрый старт
+- `docs/glossary.md` — глоссарий терминов
+- `DEVELOPMENT.md` — инструкции для разработки и параллельные тесты (`parallel_tests.rb`)
 
 ### Тесты (`tests/`)
 
