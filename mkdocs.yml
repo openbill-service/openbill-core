@@ -16,10 +16,8 @@ theme:
 
 nav:
   - Главная: index.md
-  - Пользователям:
-      - Быстрый старт: getting-started.md
-      - Глоссарий: glossary.md
-      - Use Cases и policies: use-cases.md
+  - Быстрый старт: getting-started.md
+  - Глоссарий: glossary.md
   - Отраслевые примеры:
       - Каталог examples: examples/README.md
       - Marketplace: examples/marketplace/README.md
@@ -44,7 +42,6 @@ nav:
       - Telecom Prepaid: examples/telecom-prepaid/README.md
       - Loyalty Bonuses: examples/loyalty-bonuses/README.md
   - Производительность:
-      - Дизайн бенчмарка transfers: benchmark_transfers_design.md
       - Отчёт pgbench (2026-03-04): pgbench_benchmark_report_2026-03-04.md
 
 markdown_extensions:

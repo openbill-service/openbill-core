@@ -1,14 +1,32 @@
-# Examples Catalog (Industries)
+# Каталог отраслевых примеров
 
-Этот каталог содержит отраслевые примеры использования `OPENBILL_CATEGORIES` и `OPENBILL_POLICIES`.
+Каталог показывает готовые сценарии маршрутизации переводов через `openbill_categories` и `openbill_policies`.
 
-## Формат каждой отрасли
+Каждый сценарий содержит:
 
-- `README.md` — краткое описание отрасли, список категорий, policies и типовых операций
-- `categories-and-policies.sql` — создание категорий и политик маршрутизации
-- `operations.sql` — примеры типовых операций (use cases)
+- `README.md` — доменная модель и типовые операции
+- `categories-and-policies.sql` — категории и политики маршрутов
+- `operations.sql` — демонстрационные операции
+- `test.sh` — автоматический прогон сценария с проверкой выполнения SQL
 
-## Отрасли
+## Как пользоваться каталогом
+
+1. Выберите сценарий в таблице ниже.
+2. Запустите `./docs/examples/<scenario>/test.sh` из корня репозитория.
+3. При необходимости откройте локальные SQL-файлы (`categories-and-policies.sql`, `operations.sql`) и адаптируйте под свой домен.
+
+## Быстрый выбор сценария
+
+| Ваша задача | Рекомендуемый пример | Почему начать с него |
+|---|---|---|
+| Маркетплейс с escrow и комиссией | [marketplace](marketplace/README.md) | Понятный базовый поток `оплата -> расчёт -> комиссия` |
+| Подписки и распределение выручки | [saas-subscriptions](saas-subscriptions/README.md) | Регулярные платежи + налоги + резерв на возвраты |
+| P2P-кошелёк с вводом/выводом | [p2p-wallet](p2p-wallet/README.md) | Классический wallet-контур для финтеха |
+| Платёжный провайдер (PSP) | [payment-system-psp](payment-system-psp/README.md) | Клиринг, мерчантские выплаты, fee и chargeback reserve |
+| Кредитный контур / BNPL | [credit-bnpl](credit-bnpl/README.md) | Выдача и погашение: тело, проценты, штрафы |
+| Тестовый «самый простой» старт | [donations](donations/README.md) | Минимальный сценарий для первого запуска |
+
+## Все доступные отрасли
 
 - [marketplace](marketplace/README.md)
 - [saas-subscriptions](saas-subscriptions/README.md)
@@ -32,8 +50,16 @@
 - [telecom-prepaid](telecom-prepaid/README.md)
 - [loyalty-bonuses](loyalty-bonuses/README.md)
 
-## Legacy aliases
+## Полезные команды
 
-Для обратной совместимости сохранены legacy-файлы:
+Запуск одного сценария:
 
-- `docs/use-cases.md` -> redirect в `docs/examples/README.md`
+```bash
+./docs/examples/marketplace/test.sh
+```
+
+Запуск всех сценариев:
+
+```bash
+./test-examples.sh
+```
