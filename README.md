@@ -16,6 +16,7 @@ Openbill Core implements financial accounting directly in PostgreSQL.
 - Ledger operations are plain SQL (`INSERT`/`SELECT`)
 - Validation and correctness are enforced via constraints, functions, and triggers
 - No mandatory API layer in the core
+- Financial architecture: categories model a chart of accounts (including hierarchical taxonomy at domain level), and policies enforce strict transfer routes between categories/accounts
 
 ## Core Concepts
 
@@ -116,6 +117,13 @@ Example output for balances query on a fresh DB:
 
 Why balances changed automatically: `INSERT` into `openbill_transfers` triggers database function `process_account_transfer`, which debits `from_account_id` and credits `to_account_id`.
 Each transfer is double-entry: one debit and one credit for the same amount.
+
+Data integrity guarantees:
+
+- Openbill is multi-currency: balances and invariants are tracked per `amount_currency`.
+- To get an account balance, read `openbill_accounts.amount_value`; no transfer replay is needed.
+- The sum of balances across all accounts (per currency) is always `0`.
+- This makes money creation from nowhere impossible and prevents unnoticed balance injections.
 
 Why `category_id = -1`: migrations create default category `System` with `id = -1` for quick start. In production, create domain-specific categories and policies.
 
