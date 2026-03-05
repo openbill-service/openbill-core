@@ -24,6 +24,14 @@ Openbill Core реализует финансовый учёт напрямую 
 2. **Инварианты в БД**: правила корректности живут рядом с данными.
 3. **Минимум инфраструктуры**: меньше движущихся частей и точек отказа.
 
+## Зависимости
+
+Нужна только одна зависимость:
+
+- PostgreSQL 13+
+
+Для ядра больше ничего не требуется: ни отдельный API-сервис, ни SDK, ни дополнительный рантайм.
+
 ## Преимущества
 
 - Языко-независимая интеграция для любого стека с SQL-доступом.
@@ -48,14 +56,6 @@ Openbill Core реализует финансовый учёт напрямую 
 11. **Баланс счёта изменяется только через операции.** Прямое изменение баланса невозможно — он пересчитывается только в результате переводов или холдов.
 12. **Счёт нельзя удалить, если на него ссылаются операции.** Пока существуют связанные переводы или холды — удаление счёта запрещено.
 
-## Зависимости
-
-Нужна только одна зависимость:
-
-- PostgreSQL 13+
-
-Для ядра больше ничего не требуется: ни отдельный API-сервис, ни SDK, ни дополнительный рантайм.
-
 ## Быстрый Старт (Для Пользователей)
 
 Инициализация тестовой БД:
@@ -68,46 +68,28 @@ Openbill Core реализует финансовый учёт напрямую 
 
 ```sql
 -- 1) Создаём два счёта
-INSERT INTO openbill_accounts (category_id, details)
-VALUES (-1, 'User wallet (readme)');
-
-INSERT INTO openbill_accounts (category_id, details)
-VALUES (-1, 'System income (readme)');
+INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'Bob');
+INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'Nikolas');
 
 -- 2) Проверяем балансы до перевода
-SELECT id, amount_value, amount_currency
-FROM openbill_accounts
-ORDER BY id;
+SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
 
 -- 3) Регистрируем перевод
-WITH user_wallet AS (
-  SELECT id FROM openbill_accounts
-  WHERE details = 'User wallet (readme)'
-  ORDER BY id DESC
-  LIMIT 1
-),
-system_income AS (
-  SELECT id FROM openbill_accounts
-  WHERE details = 'System income (readme)'
-  ORDER BY id DESC
-  LIMIT 1
-)
 INSERT INTO openbill_transfers
   (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
-SELECT
-  si.id,
-  uw.id,
+VALUES
+(
+  2,
+  1,
   500,
   'USD',
   'payment:demo:1',
   'Demo payment'
-FROM user_wallet uw, system_income si
+)
 RETURNING id, from_account_id, to_account_id, amount_value, amount_currency;
 
 -- 4) Проверяем балансы после перевода
-SELECT id, amount_value, amount_currency
-FROM openbill_accounts
-ORDER BY id;
+SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
 
 -- 5) Проверяем инвариант
 SELECT amount_currency, SUM(amount_value)
@@ -119,19 +101,19 @@ GROUP BY amount_currency;
 
 Пример вывода запроса балансов на свежей БД:
 
-```text
--- до перевода
- id |     amount_value      | amount_currency
-----+-----------------------+----------------
-  1 | 0.000000000000000000  | USD
-  2 | 0.000000000000000000  | USD
+До перевода:
 
--- после перевода
- id |      amount_value      | amount_currency
-----+------------------------+----------------
-  1 | 500.000000000000000000 | USD
-  2 | -500.000000000000000000 | USD
-```
+| id | amount_value | amount_currency |
+|---:|---:|---|
+| 1 | 0.000000000000000000 | USD |
+| 2 | 0.000000000000000000 | USD |
+
+После перевода:
+
+| id | amount_value | amount_currency |
+|---:|---:|---|
+| 1 | 500.000000000000000000 | USD |
+| 2 | -500.000000000000000000 | USD |
 
 Почему баланс меняется автоматически: `INSERT` в `openbill_transfers` запускает функцию БД `process_account_transfer`, которая списывает сумму с `from_account_id` и зачисляет на `to_account_id`.
 Каждый transfer работает по принципу двойной записи: одно списание и одно зачисление на одну и ту же сумму.

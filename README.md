@@ -24,6 +24,14 @@ Openbill Core implements financial accounting directly in PostgreSQL.
 2. **Invariants in the database**: correctness rules live with data.
 3. **Minimal infrastructure**: fewer moving parts and failure points.
 
+## Dependencies
+
+Only one dependency:
+
+- PostgreSQL 13+
+
+Nothing else is required for the core: no separate API service, SDK, or extra runtime.
+
 ## Advantages
 
 - Language-agnostic integration for any stack with SQL access.
@@ -48,14 +56,6 @@ All rules are enforced at the PostgreSQL level (constraints, triggers, GRANT). N
 11. **Account balance changes only through operations.** Direct balance modification is impossible — it is recalculated only as a result of transfers or holds.
 12. **An account cannot be deleted while referenced by operations.** As long as related transfers or holds exist, account deletion is forbidden.
 
-## Dependencies
-
-Only one dependency:
-
-- PostgreSQL 13+
-
-Nothing else is required for the core: no separate API service, SDK, or extra runtime.
-
 ## Quick Start (Project Users)
 
 Initialize the test database:
@@ -68,46 +68,28 @@ Minimal scenario:
 
 ```sql
 -- 1) Create two accounts
-INSERT INTO openbill_accounts (category_id, details)
-VALUES (-1, 'User wallet (readme)');
-
-INSERT INTO openbill_accounts (category_id, details)
-VALUES (-1, 'System income (readme)');
+INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'Bob');
+INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'Nikolas');
 
 -- 2) Check balances before transfer
-SELECT id, amount_value, amount_currency
-FROM openbill_accounts
-ORDER BY id;
+SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
 
 -- 3) Register a transfer
-WITH user_wallet AS (
-  SELECT id FROM openbill_accounts
-  WHERE details = 'User wallet (readme)'
-  ORDER BY id DESC
-  LIMIT 1
-),
-system_income AS (
-  SELECT id FROM openbill_accounts
-  WHERE details = 'System income (readme)'
-  ORDER BY id DESC
-  LIMIT 1
-)
 INSERT INTO openbill_transfers
   (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
-SELECT
-  si.id,
-  uw.id,
+VALUES
+(
+  2,
+  1,
   500,
   'USD',
   'payment:demo:1',
   'Demo payment'
-FROM user_wallet uw, system_income si
+)
 RETURNING id, from_account_id, to_account_id, amount_value, amount_currency;
 
 -- 4) Check balances after transfer
-SELECT id, amount_value, amount_currency
-FROM openbill_accounts
-ORDER BY id;
+SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
 
 -- 5) Verify the invariant
 SELECT amount_currency, SUM(amount_value)
@@ -119,19 +101,19 @@ Expected result: sum by each currency is `0`.
 
 Example output for balances query on a fresh DB:
 
-```text
--- before transfer
- id |     amount_value      | amount_currency
-----+-----------------------+----------------
-  1 | 0.000000000000000000  | USD
-  2 | 0.000000000000000000  | USD
+Before transfer:
 
--- after transfer
- id |      amount_value      | amount_currency
-----+------------------------+----------------
-  1 | 500.000000000000000000 | USD
-  2 | -500.000000000000000000 | USD
-```
+| id | amount_value | amount_currency |
+|---:|---:|---|
+| 1 | 0.000000000000000000 | USD |
+| 2 | 0.000000000000000000 | USD |
+
+After transfer:
+
+| id | amount_value | amount_currency |
+|---:|---:|---|
+| 1 | 500.000000000000000000 | USD |
+| 2 | -500.000000000000000000 | USD |
 
 Why balances changed automatically: `INSERT` into `openbill_transfers` triggers database function `process_account_transfer`, which debits `from_account_id` and credits `to_account_id`.
 Each transfer is double-entry: one debit and one credit for the same amount.
