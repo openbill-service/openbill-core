@@ -30,6 +30,23 @@ Openbill Core implements financial accounting directly in PostgreSQL.
 - Deterministic behavior: checks run at the same consistency boundary as writes.
 - Transparent traceability through ledger tables.
 
+## Invariants
+
+All rules are enforced at the PostgreSQL level (constraints, triggers, GRANT). No client application can bypass them.
+
+1. **System balance is always zero.** The sum of all funds across all accounts, including held amounts, is always zero. Money cannot appear from nowhere or disappear.
+2. **Transfers are single-currency only.** The transfer currency must match the currency of both the source and destination accounts.
+3. **Transfers are only between different accounts.** You cannot transfer funds from an account to itself.
+4. **Transfer amount is always positive.** The direction of fund movement is determined by the source/destination pair, not by the sign of the amount.
+5. **Account type restricts balance sign.** A "positive" account cannot go negative; a "negative" account cannot go positive.
+6. **A locked account cannot be a transfer source.** If an account is locked, debiting from it is impossible.
+7. **Every operation is idempotent.** A duplicate transfer or hold with the same idempotency key is rejected.
+8. **Every transfer must match a policy.** If no policy permits the given transfer direction, the operation is rejected.
+9. **Reversals must match the original exactly.** A reverse transaction must have the same amount, currency, and account pair (in the opposite direction) as the original.
+10. **You cannot hold more than the account balance.** Likewise, you cannot release more than what is held.
+11. **Account balance changes only through operations.** Direct balance modification is impossible — it is recalculated only as a result of transfers or holds.
+12. **An account cannot be deleted while referenced by operations.** As long as related transfers or holds exist, account deletion is forbidden.
+
 ## Dependencies
 
 Only one dependency:
