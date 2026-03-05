@@ -9,8 +9,8 @@ WITH pick AS (
 )
 
 INSERT INTO openbill_transfers (
-    amount_value,
-    amount_currency,
+    amount,
+    currency,
     from_account_id,
     to_account_id,
     idempotency_key,

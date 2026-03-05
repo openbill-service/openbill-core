@@ -3,8 +3,8 @@
 \set hold_key random(1, 2000000000)
 
 INSERT INTO openbill_transfers (
-    amount_value,
-    amount_currency,
+    amount,
+    currency,
     from_account_id,
     to_account_id,
     idempotency_key,
@@ -22,8 +22,8 @@ VALUES
 
 INSERT INTO openbill_holds (
     account_id,
-    amount_value,
-    amount_currency,
+    amount,
+    currency,
     idempotency_key,
     details
 )
@@ -37,8 +37,8 @@ VALUES
     );
 
 INSERT INTO openbill_transfers (
-    amount_value,
-    amount_currency,
+    amount,
+    currency,
     from_account_id,
     to_account_id,
     idempotency_key,
@@ -56,8 +56,8 @@ VALUES
 
 INSERT INTO openbill_holds (
     account_id,
-    amount_value,
-    amount_currency,
+    amount,
+    currency,
     idempotency_key,
     hold_key,
     details
@@ -73,8 +73,8 @@ VALUES
     );
 
 INSERT INTO openbill_transfers (
-    amount_value,
-    amount_currency,
+    amount,
+    currency,
     from_account_id,
     to_account_id,
     idempotency_key,
