@@ -79,27 +79,25 @@ Minimal scenario:
 
 ```sql
 -- 1) Create two accounts
-INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'Bob');
-INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'Nikolas');
+INSERT INTO openbill_accounts (id, category_id, details) VALUES (1, -1, 'Bob');
+INSERT INTO openbill_accounts (id, category_id, details) VALUES (2, -1, 'Nikolas');
 
 -- 2) Check balances before transfer
-SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
--- Example output:
---  id | amount_value | amount_currency
--- ----+--------------+----------------
---   1 |         0.00 | USD
---   2 |         0.00 | USD
+SELECT details, amount_value, amount_currency FROM openbill_accounts;
+-- details | amount_value | amount_currency
+-- --------+--------------+----------------
+-- Bob     |         0.00 | USD
+-- Nikolas |         0.00 | USD
 
 -- 3) Register a transfer
 INSERT INTO openbill_transfers VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment')
 
 -- 4) Check balances after transfer
-SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
--- Example output:
---  id | amount_value | amount_currency
--- ----+--------------+----------------
---   1 |       500.00 | USD
---   2 |      -500.00 | USD
+SELECT details, amount_value, amount_currency FROM openbill_accounts;
+-- details | amount_value | amount_currency
+-- --------+--------------+----------------
+-- Bob     |       500.00 | USD
+-- Nikolas |      -500.00 | USD
 ```
 
 Why balances changed automatically: `INSERT` into `openbill_transfers` triggers database function `process_account_transfer`, which debits `from_account_id` and credits `to_account_id`.

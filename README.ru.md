@@ -79,27 +79,25 @@ Openbill Core реализует финансовый учёт напрямую 
 
 ```sql
 -- 1) Создаём два счёта
-INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'Bob');
-INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'Nikolas');
+INSERT INTO openbill_accounts (id, category_id, details) VALUES (1, -1, 'Bob');
+INSERT INTO openbill_accounts (id, category_id, details) VALUES (2, -1, 'Nikolas');
 
 -- 2) Проверяем балансы до перевода
-SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
--- Пример вывода:
---  id | amount_value | amount_currency
--- ----+--------------+----------------
---   1 |         0.00 | USD
---   2 |         0.00 | USD
+SELECT details, amount_value, amount_currency FROM openbill_accounts;
+-- details | amount_value | amount_currency
+-- --------+--------------+----------------
+-- Bob     |         0.00 | USD
+-- Nikolas |         0.00 | USD
 
 -- 3) Регистрируем перевод
 INSERT INTO openbill_transfers VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment')
 
 -- 4) Проверяем балансы после перевода
-SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
--- Пример вывода:
---  id | amount_value | amount_currency
--- ----+--------------+----------------
---   1 |       500.00 | USD
---   2 |      -500.00 | USD
+SELECT details, amount_value, amount_currency FROM openbill_accounts;
+-- details | amount_value | amount_currency
+-- --------+--------------+----------------
+-- Bob     |       500.00 | USD
+-- Nikolas |      -500.00 | USD
 ```
 
 Почему баланс меняется автоматически: `INSERT` в `openbill_transfers` запускает функцию БД `process_account_transfer`, которая списывает сумму с `from_account_id` и зачисляет на `to_account_id`.
