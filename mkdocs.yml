@@ -24,6 +24,7 @@ nav:
       - Трансферы (Transfers): entities/transfers.md
       - Категории (Categories): entities/categories.md
       - Policy: entities/policy.md
+      - Удержания (Holds): entities/holds.md
   - Отраслевые примеры:
       - Каталог examples: examples/README.md
       - Marketplace: examples/marketplace/README.md
@@ -55,3 +56,8 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
