@@ -7,6 +7,8 @@ Openbill Core: Надежный биллинг на уровне базы дан
 ## Разделы
 
 - [Быстрый старт](getting-started.md)
+- [Глоссарий](glossary.md)
+- [Сущности Openbill Core](entities/index.md)
 - [Use Cases и policies](use-cases.md)
 - [Дизайн бенчмарка transfer-пути](benchmark_transfers_design.md)
 - [Отчёт pgbench (2026-03-04)](pgbench_benchmark_report_2026-03-04.md)

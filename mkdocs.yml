@@ -18,6 +18,12 @@ nav:
   - Главная: index.md
   - Быстрый старт: getting-started.md
   - Глоссарий: glossary.md
+  - Сущности:
+      - Обзор сущностей: entities/index.md
+      - Счета (Accounts): entities/accounts.md
+      - Трансферы (Transfers): entities/transfers.md
+      - Категории (Categories): entities/categories.md
+      - Policy: entities/policy.md
   - Отраслевые примеры:
       - Каталог examples: examples/README.md
       - Marketplace: examples/marketplace/README.md
