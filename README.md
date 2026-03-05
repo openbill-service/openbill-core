@@ -16,6 +16,7 @@ Openbill Core implements financial accounting directly in PostgreSQL.
 - Ledger operations are plain SQL (`INSERT`/`SELECT`)
 - Validation and correctness are enforced via constraints, functions, and triggers
 - No mandatory API layer in the core
+- Battle-tested in production for 10+ years, with tens of billions of dollars processed through this accounting core
 - Financial architecture: categories model a chart of accounts (including hierarchical taxonomy at domain level), and policies enforce strict transfer routes between categories/accounts
 
 ## Core Concepts
