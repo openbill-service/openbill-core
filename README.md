@@ -56,6 +56,13 @@ All rules are enforced at the PostgreSQL level (constraints, triggers, GRANT). N
 11. **Account balance changes only through operations.** Direct balance modification is impossible — it is recalculated only as a result of transfers or holds.
 12. **An account cannot be deleted while referenced by operations.** As long as related transfers or holds exist, account deletion is forbidden.
 
+Practical integrity guarantees:
+
+- Openbill is multi-currency: balances and invariants are tracked per `amount_currency`.
+- To get an account balance, read `openbill_accounts.amount_value`; no transfer replay is needed.
+- The sum of balances across all accounts (per currency) is always `0`.
+- This makes money creation from nowhere impossible and prevents unnoticed balance injections.
+
 ## Quick Start (Project Users)
 
 Initialize the test database:
@@ -73,10 +80,14 @@ INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'Nikolas');
 
 -- 2) Check balances before transfer
 SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
+-- Example output:
+--  id |     amount_value      | amount_currency
+-- ----+-----------------------+----------------
+--   1 | 0.000000000000000000  | USD
+--   2 | 0.000000000000000000  | USD
 
 -- 3) Register a transfer
 INSERT INTO openbill_transfers
-  (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
 VALUES
 (
   2,
@@ -90,42 +101,15 @@ RETURNING id, from_account_id, to_account_id, amount_value, amount_currency;
 
 -- 4) Check balances after transfer
 SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
-
--- 5) Verify the invariant
-SELECT amount_currency, SUM(amount_value)
-FROM openbill_accounts
-GROUP BY amount_currency;
+-- Example output:
+--  id |      amount_value      | amount_currency
+-- ----+------------------------+----------------
+--   1 | 500.000000000000000000 | USD
+--   2 | -500.000000000000000000 | USD
 ```
-
-Expected result: sum by each currency is `0`.
-
-Example output for balances query on a fresh DB:
-
-Before transfer:
-
-| id | amount_value | amount_currency |
-|---:|---:|---|
-| 1 | 0.000000000000000000 | USD |
-| 2 | 0.000000000000000000 | USD |
-
-After transfer:
-
-| id | amount_value | amount_currency |
-|---:|---:|---|
-| 1 | 500.000000000000000000 | USD |
-| 2 | -500.000000000000000000 | USD |
 
 Why balances changed automatically: `INSERT` into `openbill_transfers` triggers database function `process_account_transfer`, which debits `from_account_id` and credits `to_account_id`.
 Each transfer is double-entry: one debit and one credit for the same amount.
-
-Data integrity guarantees:
-
-- Openbill is multi-currency: balances and invariants are tracked per `amount_currency`.
-- To get an account balance, read `openbill_accounts.amount_value`; no transfer replay is needed.
-- The sum of balances across all accounts (per currency) is always `0`.
-- This makes money creation from nowhere impossible and prevents unnoticed balance injections.
-
-Why `category_id = -1`: migrations create default category `System` with `id = -1` for quick start. In production, create domain-specific categories and policies.
 
 ## Industry Examples
 
