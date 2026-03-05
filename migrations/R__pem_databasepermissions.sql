@@ -1,6 +1,6 @@
 GRANT SELECT, INSERT, UPDATE ON openbill_categories TO public;
 GRANT SELECT, DELETE ON openbill_accounts TO public;
-GRANT INSERT (id, category_id, amount_currency, details, meta, kind) ON openbill_accounts TO public;
+GRANT INSERT (id, category_id, currency, details, meta, kind) ON openbill_accounts TO public;
 GRANT UPDATE (locked_at, details) ON openbill_accounts TO public;
 GRANT SELECT, INSERT ON openbill_transfers TO public;
 GRANT SELECT, INSERT, UPDATE, DELETE ON openbill_policies TO public;

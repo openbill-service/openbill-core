@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION openbill_transfer_delete() RETURNS TRIGGER AS $process_transfer$
 BEGIN
-  UPDATE OPENBILL_ACCOUNTS SET amount_value = amount_value - OLD.amount_value, transactions_count = transactions_count - 1 WHERE id = OLD.to_account_id;
-  UPDATE OPENBILL_ACCOUNTS SET amount_value = amount_value + OLD.amount_value, transactions_count = transactions_count - 1 WHERE id = OLD.from_account_id;
+  UPDATE OPENBILL_ACCOUNTS SET balance = balance - OLD.amount, transactions_count = transactions_count - 1 WHERE id = OLD.to_account_id;
+  UPDATE OPENBILL_ACCOUNTS SET balance = balance + OLD.amount, transactions_count = transactions_count - 1 WHERE id = OLD.from_account_id;
 
   RETURN OLD;
 END

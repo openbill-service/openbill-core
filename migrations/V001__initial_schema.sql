@@ -16,28 +16,28 @@ INSERT INTO openbill_categories (name, id) VALUES ('System', -1);
 CREATE TABLE openbill_accounts (
     id bigserial PRIMARY KEY,
     category_id bigint NOT NULL,
-    amount_value numeric(36, 18) NOT NULL DEFAULT 0,
-    amount_currency character varying(8) NOT NULL DEFAULT 'USD',
+    balance numeric(36, 18) NOT NULL DEFAULT 0,
+    currency character varying(8) NOT NULL DEFAULT 'USD',
     details text,
     transactions_count integer NOT NULL DEFAULT 0,
     meta jsonb NOT NULL DEFAULT '{}'::jsonb,
-    hold_value numeric(36, 18) NOT NULL DEFAULT 0,
+    hold_amount numeric(36, 18) NOT NULL DEFAULT 0,
     locked_at timestamp without time zone NULL,
     kind account_kind NOT NULL DEFAULT 'any',
     created_at timestamp without time zone DEFAULT current_timestamp,
     updated_at timestamp without time zone DEFAULT current_timestamp,
     FOREIGN KEY (category_id) REFERENCES openbill_categories (id) ON DELETE RESTRICT,
-    CONSTRAINT openbill_accounts_kind CHECK ((kind = 'positive' AND amount_value >= 0) OR (kind = 'negative' AND amount_value <= 0) OR kind = 'any')
+    CONSTRAINT openbill_accounts_kind CHECK ((kind = 'positive' AND balance >= 0) OR (kind = 'negative' AND balance <= 0) OR kind = 'any')
 );
 COMMENT ON TABLE openbill_accounts IS 'Account. Has a unique bigint identifier. Has information about the state of the account (balance), currency';
 COMMENT ON COLUMN openbill_accounts.id IS 'Account unique id';
 COMMENT ON COLUMN openbill_accounts.category_id IS 'Account category id, references table OPENBILL_CATEGORIES. Use for grouping accounts';
-COMMENT ON COLUMN openbill_accounts.amount_value IS 'Account balance';
-COMMENT ON COLUMN openbill_accounts.amount_currency IS 'Account currency';
+COMMENT ON COLUMN openbill_accounts.balance IS 'Account balance';
+COMMENT ON COLUMN openbill_accounts.currency IS 'Account currency';
 COMMENT ON COLUMN openbill_accounts.details IS 'Account description';
 COMMENT ON COLUMN openbill_accounts.transactions_count IS 'Number of transactions per account';
 COMMENT ON COLUMN openbill_accounts.meta IS 'Account description in json format';
-COMMENT ON COLUMN openbill_accounts.hold_value IS 'Hold amount';
+COMMENT ON COLUMN openbill_accounts.hold_amount IS 'Hold amount';
 COMMENT ON COLUMN openbill_accounts.locked_at IS 'The date the funds were holded. If the value is NULL there is no blocking';
 COMMENT ON COLUMN openbill_accounts.kind IS 'Account type';
 COMMENT ON COLUMN openbill_accounts.created_at IS 'Date time of account creation';
@@ -52,8 +52,8 @@ CREATE TABLE openbill_transfers (
     created_at timestamp without time zone DEFAULT current_timestamp,
     from_account_id bigint NOT NULL,
     to_account_id bigint NOT NULL CONSTRAINT different_accounts CHECK (to_account_id <> from_account_id),
-    amount_value numeric(36, 18) NOT NULL CONSTRAINT positive CHECK (amount_value > 0),
-    amount_currency character varying(8) NOT NULL DEFAULT 'USD',
+    amount numeric(36, 18) NOT NULL CONSTRAINT positive CHECK (amount > 0),
+    currency character varying(8) NOT NULL DEFAULT 'USD',
     idempotency_key character varying(256) NOT NULL,
     details text NOT NULL,
     meta jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -68,8 +68,8 @@ COMMENT ON COLUMN openbill_transfers.billing_date IS 'Foreign date time of trans
 COMMENT ON COLUMN openbill_transfers.created_at IS 'Date time of transfer creation';
 COMMENT ON COLUMN openbill_transfers.from_account_id IS 'Account from which the funds are transferred';
 COMMENT ON COLUMN openbill_transfers.to_account_id IS 'Account to which funds are transferred';
-COMMENT ON COLUMN openbill_transfers.amount_value IS 'Transfer amount';
-COMMENT ON COLUMN openbill_transfers.amount_currency IS 'Transfer currency';
+COMMENT ON COLUMN openbill_transfers.amount IS 'Transfer amount';
+COMMENT ON COLUMN openbill_transfers.currency IS 'Transfer currency';
 COMMENT ON COLUMN openbill_transfers.details IS 'Transfer description';
 COMMENT ON COLUMN openbill_transfers.meta IS 'Transfer description in json format';
 COMMENT ON COLUMN openbill_transfers.idempotency_key IS 'Human readable unique transfer key';
@@ -110,15 +110,15 @@ CREATE TABLE openbill_holds (
     date date DEFAULT current_date NOT NULL,
     created_at timestamp without time zone DEFAULT current_timestamp,
     account_id bigint NOT NULL,
-    amount_value numeric(36, 18) NOT NULL,
-    amount_currency character varying(8) NOT NULL DEFAULT 'USD',
+    amount numeric(36, 18) NOT NULL,
+    currency character varying(8) NOT NULL DEFAULT 'USD',
     idempotency_key character varying(256) UNIQUE NOT NULL,
     details text NOT NULL,
     meta jsonb NOT NULL DEFAULT '{}'::jsonb,
     hold_key character varying(256),
     FOREIGN KEY (hold_key) REFERENCES openbill_holds (idempotency_key) ON DELETE RESTRICT ON UPDATE RESTRICT,
     FOREIGN KEY (account_id) REFERENCES openbill_accounts (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-    CHECK ((amount_value < 0 AND hold_key IS NOT NULL) OR (amount_value > 0 AND hold_key IS NULL))
+    CHECK ((amount < 0 AND hold_key IS NOT NULL) OR (amount > 0 AND hold_key IS NULL))
 );
 
 CREATE INDEX index_holds_on_meta ON openbill_holds USING gin (meta);
@@ -128,8 +128,8 @@ COMMENT ON COLUMN openbill_holds.id IS 'Hold unique id';
 COMMENT ON COLUMN openbill_holds.date IS 'Foreign date time of hold creation';
 COMMENT ON COLUMN openbill_holds.created_at IS 'Date time of hold creation';
 COMMENT ON COLUMN openbill_holds.account_id IS 'Account which the funds are holded';
-COMMENT ON COLUMN openbill_holds.amount_value IS 'Hold amount';
-COMMENT ON COLUMN openbill_holds.amount_currency IS 'Hold currency';
+COMMENT ON COLUMN openbill_holds.amount IS 'Hold amount';
+COMMENT ON COLUMN openbill_holds.currency IS 'Hold currency';
 COMMENT ON COLUMN openbill_holds.details IS 'Hold description';
 COMMENT ON COLUMN openbill_holds.meta IS 'Hold description in json format';
 COMMENT ON COLUMN openbill_holds.idempotency_key IS 'Human readable unique hold key';

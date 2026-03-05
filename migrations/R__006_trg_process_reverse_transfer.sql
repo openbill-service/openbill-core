@@ -2,8 +2,8 @@ CREATE OR REPLACE FUNCTION process_reverse_transfer() RETURNS TRIGGER AS $proces
 BEGIN
   IF NEW.reverse_transaction_id IS NOT NULL THEN
     PERFORM * FROM OPENBILL_TRANSFERS
-      WHERE amount_value = NEW.amount_value
-        AND amount_currency = NEW.amount_currency
+      WHERE amount = NEW.amount
+        AND currency = NEW.currency
         AND from_account_id = NEW.to_account_id
         AND to_account_id = NEW.from_account_id
         AND id = NEW.reverse_transaction_id;

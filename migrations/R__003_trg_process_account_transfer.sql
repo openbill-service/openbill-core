@@ -6,7 +6,7 @@ BEGIN
   -- Загружаем from-счёт одним запросом: валюта + блокировка
   SELECT * FROM OPENBILL_ACCOUNTS WHERE id = NEW.from_account_id INTO v_from_account;
 
-  IF v_from_account.amount_currency <> NEW.amount_currency THEN
+  IF v_from_account.currency <> NEW.currency THEN
     RAISE EXCEPTION 'Account (from #%) has wrong currency', NEW.from_account_id;
   END IF;
 
@@ -15,18 +15,18 @@ BEGIN
   END IF;
 
   -- Проверяем валюту to-счёта
-  SELECT amount_currency FROM OPENBILL_ACCOUNTS WHERE id = NEW.to_account_id INTO v_to_currency;
-  IF v_to_currency <> NEW.amount_currency THEN
+  SELECT currency FROM OPENBILL_ACCOUNTS WHERE id = NEW.to_account_id INTO v_to_currency;
+  IF v_to_currency <> NEW.currency THEN
     RAISE EXCEPTION 'Account (to #%) has wrong currency', NEW.to_account_id;
   END IF;
 
   -- Обновляем балансы (порядок по id для предотвращения deadlock)
   IF NEW.to_account_id > NEW.from_account_id THEN
-    UPDATE OPENBILL_ACCOUNTS SET amount_value = amount_value - NEW.amount_value, transactions_count = transactions_count + 1 WHERE id = NEW.from_account_id;
-    UPDATE OPENBILL_ACCOUNTS SET amount_value = amount_value + NEW.amount_value, transactions_count = transactions_count + 1 WHERE id = NEW.to_account_id;
+    UPDATE OPENBILL_ACCOUNTS SET balance = balance - NEW.amount, transactions_count = transactions_count + 1 WHERE id = NEW.from_account_id;
+    UPDATE OPENBILL_ACCOUNTS SET balance = balance + NEW.amount, transactions_count = transactions_count + 1 WHERE id = NEW.to_account_id;
   ELSE
-    UPDATE OPENBILL_ACCOUNTS SET amount_value = amount_value + NEW.amount_value, transactions_count = transactions_count + 1 WHERE id = NEW.to_account_id;
-    UPDATE OPENBILL_ACCOUNTS SET amount_value = amount_value - NEW.amount_value, transactions_count = transactions_count + 1 WHERE id = NEW.from_account_id;
+    UPDATE OPENBILL_ACCOUNTS SET balance = balance + NEW.amount, transactions_count = transactions_count + 1 WHERE id = NEW.to_account_id;
+    UPDATE OPENBILL_ACCOUNTS SET balance = balance - NEW.amount, transactions_count = transactions_count + 1 WHERE id = NEW.from_account_id;
   END IF;
 
   RETURN NEW;
