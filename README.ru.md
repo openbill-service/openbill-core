@@ -92,7 +92,7 @@ SELECT details, amount_value, amount_currency FROM openbill_accounts;
 
 -- 3) Регистрируем перевод
 INSERT INTO openbill_transfers VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment')
--- Автообработка: process_account_transfer списывает со счёта 2 и зачисляет на 1 (двойная запись).
+-- Автообработка: process_account_transfer списывает 500 USD с Nikolas и зачисляет 500 USD на Bob (двойная запись).
 
 -- 4) Проверяем балансы после перевода
 SELECT details, amount_value, amount_currency FROM openbill_accounts;
@@ -100,33 +100,49 @@ SELECT details, amount_value, amount_currency FROM openbill_accounts;
 -- --------+--------------+----------------
 -- Bob     |       500.00 | USD
 -- Nikolas |      -500.00 | USD
+
+-- Проверка целостности: сумма всех балансов должна оставаться 0.00, чтобы деньги не могли появиться или исчезнуть.
+-- 5) Проверяем целостность (сумма всех балансов равна нулю)
+SELECT SUM(amount_value) FROM openbill_accounts;
+-- sum
+-- ------
+--  0.00
 ```
 
 ## Отраслевые Примеры
 
-Примеры по отраслям:
+### Платежи И Кошельки
+
+- [P2P Wallet](docs/examples/p2p-wallet/README.md)
+- [Payment System (PSP)](docs/examples/payment-system-psp/README.md)
+- [Remittance](docs/examples/remittance/README.md)
+- [Telecom Prepaid](docs/examples/telecom-prepaid/README.md)
+- [Gift Cards](docs/examples/gift-cards/README.md)
+- [Card Issuer](docs/examples/card-issuer/README.md)
+
+### Кредитование, Банки И Риск
+
+- [Bank](docs/examples/bank/README.md)
+- [Credit / BNPL](docs/examples/credit-bnpl/README.md)
+- [Insurance](docs/examples/insurance/README.md)
+- [Payroll](docs/examples/payroll/README.md)
+
+### Коммерция И Монетизация Платформ
 
 - [Marketplace](docs/examples/marketplace/README.md)
 - [SaaS Subscriptions](docs/examples/saas-subscriptions/README.md)
-- [P2P Wallet](docs/examples/p2p-wallet/README.md)
 - [Donations](docs/examples/donations/README.md)
-- [Gift Cards](docs/examples/gift-cards/README.md)
 - [Affiliate Payouts](docs/examples/affiliate-payouts/README.md)
 - [Gaming](docs/examples/gaming/README.md)
-- [Exchange](docs/examples/exchange/README.md)
-- [Crypto Custody](docs/examples/crypto-custody/README.md)
-- [Bank](docs/examples/bank/README.md)
-- [Payment System (PSP)](docs/examples/payment-system-psp/README.md)
-- [Insurance](docs/examples/insurance/README.md)
-- [Payroll](docs/examples/payroll/README.md)
-- [Credit / BNPL](docs/examples/credit-bnpl/README.md)
-- [Card Issuer](docs/examples/card-issuer/README.md)
-- [Remittance](docs/examples/remittance/README.md)
 - [Travel Booking](docs/examples/travel-booking/README.md)
 - [Referral Program](docs/examples/referral-program/README.md)
 - [Ad Network](docs/examples/ad-network/README.md)
-- [Telecom Prepaid](docs/examples/telecom-prepaid/README.md)
 - [Loyalty Bonuses](docs/examples/loyalty-bonuses/README.md)
+
+### Крипто И Обмен
+
+- [Exchange](docs/examples/exchange/README.md)
+- [Crypto Custody](docs/examples/crypto-custody/README.md)
 
 ## Документация
 
@@ -165,7 +181,7 @@ SELECT details, amount_value, amount_currency FROM openbill_accounts;
 - Каталог сценариев: [docs/examples/README.md](docs/examples/README.md)
 - Запуск всех примеров: `./test-examples.sh`
 
-### Contributins
+### Contributions
 
 - Руководство разработчика: [DEVELOPMENT.md](DEVELOPMENT.md)
 

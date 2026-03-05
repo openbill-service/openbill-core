@@ -92,7 +92,7 @@ SELECT details, amount_value, amount_currency FROM openbill_accounts;
 
 -- 3) Register a transfer
 INSERT INTO openbill_transfers VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment')
--- Automatic processing: process_account_transfer debits 2 and credits 1 (double-entry).
+-- Automatic processing: process_account_transfer debits 500 USD from Nikolas and credits 500 USD to Bob (double-entry).
 
 -- 4) Check balances after transfer
 SELECT details, amount_value, amount_currency FROM openbill_accounts;
@@ -100,33 +100,49 @@ SELECT details, amount_value, amount_currency FROM openbill_accounts;
 -- --------+--------------+----------------
 -- Bob     |       500.00 | USD
 -- Nikolas |      -500.00 | USD
+
+-- Integrity check: total balance must remain 0.00, so money cannot appear or disappear.
+-- 5) Verify integrity (sum of all balances is zero)
+SELECT SUM(amount_value) FROM openbill_accounts;
+-- sum
+-- ------
+--  0.00
 ```
 
 ## Industry Examples
 
-Examples by industry:
+### Payments & Wallets
+
+- [P2P Wallet](docs/examples/p2p-wallet/README.md)
+- [Payment System (PSP)](docs/examples/payment-system-psp/README.md)
+- [Remittance](docs/examples/remittance/README.md)
+- [Telecom Prepaid](docs/examples/telecom-prepaid/README.md)
+- [Gift Cards](docs/examples/gift-cards/README.md)
+- [Card Issuer](docs/examples/card-issuer/README.md)
+
+### Lending, Banking & Risk
+
+- [Bank](docs/examples/bank/README.md)
+- [Credit / BNPL](docs/examples/credit-bnpl/README.md)
+- [Insurance](docs/examples/insurance/README.md)
+- [Payroll](docs/examples/payroll/README.md)
+
+### Commerce & Platform Monetization
 
 - [Marketplace](docs/examples/marketplace/README.md)
 - [SaaS Subscriptions](docs/examples/saas-subscriptions/README.md)
-- [P2P Wallet](docs/examples/p2p-wallet/README.md)
 - [Donations](docs/examples/donations/README.md)
-- [Gift Cards](docs/examples/gift-cards/README.md)
 - [Affiliate Payouts](docs/examples/affiliate-payouts/README.md)
 - [Gaming](docs/examples/gaming/README.md)
-- [Exchange](docs/examples/exchange/README.md)
-- [Crypto Custody](docs/examples/crypto-custody/README.md)
-- [Bank](docs/examples/bank/README.md)
-- [Payment System (PSP)](docs/examples/payment-system-psp/README.md)
-- [Insurance](docs/examples/insurance/README.md)
-- [Payroll](docs/examples/payroll/README.md)
-- [Credit / BNPL](docs/examples/credit-bnpl/README.md)
-- [Card Issuer](docs/examples/card-issuer/README.md)
-- [Remittance](docs/examples/remittance/README.md)
 - [Travel Booking](docs/examples/travel-booking/README.md)
 - [Referral Program](docs/examples/referral-program/README.md)
 - [Ad Network](docs/examples/ad-network/README.md)
-- [Telecom Prepaid](docs/examples/telecom-prepaid/README.md)
 - [Loyalty Bonuses](docs/examples/loyalty-bonuses/README.md)
+
+### Crypto & Exchange
+
+- [Exchange](docs/examples/exchange/README.md)
+- [Crypto Custody](docs/examples/crypto-custody/README.md)
 
 ## Documentation
 
@@ -165,7 +181,7 @@ Invariant check after benchmark:
 - Use-case catalog: [docs/examples/README.md](docs/examples/README.md)
 - Run all examples: `./test-examples.sh`
 
-### Contributins
+### Contributions
 
 - Developer guide: [DEVELOPMENT.md](DEVELOPMENT.md)
 
