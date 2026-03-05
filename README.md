@@ -56,9 +56,8 @@ INSERT INTO openbill_accounts (category_id, details)
 VALUES (-1, 'System income (readme)');
 
 -- 2) Check balances before transfer
-SELECT id, details, amount_value, amount_currency
+SELECT id, amount_value, amount_currency
 FROM openbill_accounts
-WHERE details IN ('User wallet (readme)', 'System income (readme)')
 ORDER BY id;
 
 -- 3) Register a transfer
@@ -87,9 +86,8 @@ FROM user_wallet uw, system_income si
 RETURNING id, from_account_id, to_account_id, amount_value, amount_currency;
 
 -- 4) Check balances after transfer
-SELECT id, details, amount_value, amount_currency
+SELECT id, amount_value, amount_currency
 FROM openbill_accounts
-WHERE details IN ('User wallet (readme)', 'System income (readme)')
 ORDER BY id;
 
 -- 5) Verify the invariant
@@ -100,7 +98,24 @@ GROUP BY amount_currency;
 
 Expected result: sum by each currency is `0`.
 
+Example output for balances query on a fresh DB:
+
+```text
+-- before transfer
+ id |     amount_value      | amount_currency
+----+-----------------------+----------------
+  1 | 0.000000000000000000  | USD
+  2 | 0.000000000000000000  | USD
+
+-- after transfer
+ id |      amount_value      | amount_currency
+----+------------------------+----------------
+  1 | 500.000000000000000000 | USD
+  2 | -500.000000000000000000 | USD
+```
+
 Why balances changed automatically: `INSERT` into `openbill_transfers` triggers database function `process_account_transfer`, which debits `from_account_id` and credits `to_account_id`.
+Each transfer is double-entry: one debit and one credit for the same amount.
 
 Why `category_id = -1`: migrations create default category `System` with `id = -1` for quick start. In production, create domain-specific categories and policies.
 

@@ -56,9 +56,8 @@ INSERT INTO openbill_accounts (category_id, details)
 VALUES (-1, 'System income (readme)');
 
 -- 2) Проверяем балансы до перевода
-SELECT id, details, amount_value, amount_currency
+SELECT id, amount_value, amount_currency
 FROM openbill_accounts
-WHERE details IN ('User wallet (readme)', 'System income (readme)')
 ORDER BY id;
 
 -- 3) Регистрируем перевод
@@ -87,9 +86,8 @@ FROM user_wallet uw, system_income si
 RETURNING id, from_account_id, to_account_id, amount_value, amount_currency;
 
 -- 4) Проверяем балансы после перевода
-SELECT id, details, amount_value, amount_currency
+SELECT id, amount_value, amount_currency
 FROM openbill_accounts
-WHERE details IN ('User wallet (readme)', 'System income (readme)')
 ORDER BY id;
 
 -- 5) Проверяем инвариант
@@ -100,7 +98,24 @@ GROUP BY amount_currency;
 
 Ожидаемый результат: сумма по каждой валюте равна `0`.
 
+Пример вывода запроса балансов на свежей БД:
+
+```text
+-- до перевода
+ id |     amount_value      | amount_currency
+----+-----------------------+----------------
+  1 | 0.000000000000000000  | USD
+  2 | 0.000000000000000000  | USD
+
+-- после перевода
+ id |      amount_value      | amount_currency
+----+------------------------+----------------
+  1 | 500.000000000000000000 | USD
+  2 | -500.000000000000000000 | USD
+```
+
 Почему баланс меняется автоматически: `INSERT` в `openbill_transfers` запускает функцию БД `process_account_transfer`, которая списывает сумму с `from_account_id` и зачисляет на `to_account_id`.
+Каждый transfer работает по принципу двойной записи: одно списание и одно зачисление на одну и ту же сумму.
 
 Почему `category_id = -1`: в миграциях создаётся дефолтная категория `System` с `id = -1` для быстрого старта. В production обычно создают свои доменные категории и policy.
 
