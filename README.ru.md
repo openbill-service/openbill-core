@@ -144,11 +144,19 @@ SELECT SUM(amount_value) FROM openbill_accounts;
 - [Exchange](docs/examples/exchange/README.md)
 - [Crypto Custody](docs/examples/crypto-custody/README.md)
 
-## Документация
+## Где Узнать Больше
+
+### Для Пользователей Openbill
 
 - Индекс документации: [docs/index.md](docs/index.md)
 - Быстрый старт: [docs/getting-started.md](docs/getting-started.md)
 - Обзор сущностей: [docs/entities/index.md](docs/entities/index.md)
+- Каталог сценариев: [docs/examples/README.md](docs/examples/README.md)
+- Запуск всех примеров: `./test-examples.sh`
+
+### Для Контрибьюторов
+
+- Руководство разработчика: [DEVELOPMENT.md](DEVELOPMENT.md)
 
 ## Краткий Отчёт По Бенчмаркам (2026-03-04)
 
@@ -171,19 +179,6 @@ SELECT SUM(amount_value) FROM openbill_accounts;
 - [`openbill_holds`](docs/glossary.md#hold) - временная блокировка средств
 - [`openbill_categories`](docs/entities/categories.md) - категории счетов
 - [`openbill_policies`](docs/entities/policy.md) - разрешённые маршруты переводов
-
-## Разделение По Аудиториям
-
-### Для Пользователей Openbill
-
-- Старт: [docs/getting-started.md](docs/getting-started.md)
-- Справочник по сущностям: [docs/entities/index.md](docs/entities/index.md)
-- Каталог сценариев: [docs/examples/README.md](docs/examples/README.md)
-- Запуск всех примеров: `./test-examples.sh`
-
-### Contributions
-
-- Руководство разработчика: [DEVELOPMENT.md](DEVELOPMENT.md)
 
 ## Смежные Проекты
 

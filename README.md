@@ -144,11 +144,19 @@ SELECT SUM(amount_value) FROM openbill_accounts;
 - [Exchange](docs/examples/exchange/README.md)
 - [Crypto Custody](docs/examples/crypto-custody/README.md)
 
-## Documentation
+## Learn More
+
+### For Openbill Users
 
 - Documentation index: [docs/index.md](docs/index.md)
 - Quick start: [docs/getting-started.md](docs/getting-started.md)
 - Entities overview: [docs/entities/index.md](docs/entities/index.md)
+- Use-case catalog: [docs/examples/README.md](docs/examples/README.md)
+- Run all examples: `./test-examples.sh`
+
+### For Contributors
+
+- Developer guide: [DEVELOPMENT.md](DEVELOPMENT.md)
 
 ## Benchmark Snapshot (2026-03-04)
 
@@ -171,19 +179,6 @@ Invariant check after benchmark:
 - [`openbill_holds`](docs/glossary.md#hold) - temporary fund locks
 - [`openbill_categories`](docs/entities/categories.md) - account categories
 - [`openbill_policies`](docs/entities/policy.md) - allowed transfer routes
-
-## Audience Guide
-
-### For Openbill Users
-
-- Start here: [docs/getting-started.md](docs/getting-started.md)
-- Entities reference: [docs/entities/index.md](docs/entities/index.md)
-- Use-case catalog: [docs/examples/README.md](docs/examples/README.md)
-- Run all examples: `./test-examples.sh`
-
-### Contributions
-
-- Developer guide: [DEVELOPMENT.md](DEVELOPMENT.md)
 
 ## Related Projects
 
