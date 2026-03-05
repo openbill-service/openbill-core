@@ -5,26 +5,26 @@
 [![SQL Style](https://github.com/openbill-service/openbill-core/actions/workflows/sql-style.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions/workflows/sql-style.yml)
 [![Docs Pages](https://github.com/openbill-service/openbill-core/actions/workflows/docs-pages.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions/workflows/docs-pages.yml)
 
-Openbill Core — SQL-ядро биллинга на PostgreSQL.
+Openbill Core is a pure-PostgreSQL billing engine.
 
-Проект реализует учёт движения денег на уровне базы данных (счета, переводы, политики, холды) и защищает инварианты через функции и триггеры.
+The project implements financial accounting at the database level (accounts, transfers, policies, holds) and enforces invariants through functions and triggers.
 
-## Документация
+## Documentation
 
-- Сайт документации: https://openbill-service.github.io/openbill-core/
-- Быстрый старт для пользователей: https://openbill-service.github.io/openbill-core/getting-started/
-- Каталог сценариев (`categories` + `policies`): https://openbill-service.github.io/openbill-core/use-cases/
-- Производительность:
+- Documentation site: https://openbill-service.github.io/openbill-core/
+- Quick start for users: https://openbill-service.github.io/openbill-core/getting-started/
+- Use-case catalog (`categories` + `policies`): https://openbill-service.github.io/openbill-core/use-cases/
+- Performance:
   - https://openbill-service.github.io/openbill-core/benchmark_transfers_design/
   - https://openbill-service.github.io/openbill-core/pgbench_benchmark_report_2026-03-04/
 
-## Отраслевые примеры
+## Industry Examples
 
-Полный каталог:
+Full catalog:
 
 - [Examples Catalog](docs/examples/README.md)
 
-Примеры по отраслям:
+Examples by industry:
 
 - [Marketplace](docs/examples/marketplace/README.md)
 - [SaaS Subscriptions](docs/examples/saas-subscriptions/README.md)
@@ -48,75 +48,75 @@ Openbill Core — SQL-ядро биллинга на PostgreSQL.
 - [Telecom Prepaid](docs/examples/telecom-prepaid/README.md)
 - [Loyalty Bonuses](docs/examples/loyalty-bonuses/README.md)
 
-## Краткая концепция
+## Core Concept
 
-Openbill строится вокруг трёх базовых идей:
+Openbill is built around three fundamental ideas:
 
-1. **Ledger в PostgreSQL**: операции проводятся обычными SQL-запросами.
-2. **Инварианты в БД**: корректность обеспечивается триггерами и ограничениями, а не только кодом приложения.
-3. **Минимум инфраструктуры**: без отдельного API-слоя в ядре.
+1. **Ledger in PostgreSQL**: transactions are executed via plain SQL queries.
+2. **Invariants in the database**: correctness is enforced by triggers and constraints, not just application code.
+3. **Minimal infrastructure**: no separate API layer in the core.
 
-## Ключевые сущности
+## Key Entities
 
-- `openbill_accounts` — счета и остатки.
-- `openbill_transfers` — операции перемещения между счетами.
-- `openbill_holds` — временная блокировка средств.
-- `openbill_categories` — категории счетов.
-- `openbill_policies` — разрешённые маршруты переводов.
+- `openbill_accounts` — accounts and balances.
+- `openbill_transfers` — fund movement operations between accounts.
+- `openbill_holds` — temporary fund locks.
+- `openbill_categories` — account categories.
+- `openbill_policies` — allowed transfer routes.
 
-## Преимущества подхода
+## Advantages
 
-- Языко-независимая интеграция: любой стек, умеющий SQL.
-- Детеминированное поведение: проверки проводятся на уровне БД.
-- Простой операционный контур: меньше сервисов и точек отказа.
-- Прозрачная трассировка финансовых операций через таблицы ledger.
+- Language-agnostic integration: any stack that speaks SQL.
+- Deterministic behavior: validations happen at the database level.
+- Simple operational footprint: fewer services and failure points.
+- Transparent financial operation tracing through ledger tables.
 
-## Быстрый старт (для пользователей проекта)
+## Quick Start (for project users)
 
-Требования:
+Requirements:
 
 - PostgreSQL 13+
 
-Инициализация тестовой БД:
+Initialize the test database:
 
 ```shell
 ./tests/create.sh
 ```
 
-Минимальный сценарий:
+Minimal scenario:
 
 ```sql
--- 1) Создаём два счёта
+-- 1) Create two accounts
 INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'User wallet');
 INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'System income');
 
--- 2) Регистрируем перевод
+-- 2) Register a transfer
 INSERT INTO openbill_transfers
   (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
 VALUES
   (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment');
 
--- 3) Проверяем инвариант системы
+-- 3) Verify the system invariant
 SELECT amount_currency, SUM(amount_value)
 FROM openbill_accounts
 GROUP BY amount_currency;
 ```
 
-Ожидаемо: сумма по каждой валюте должна быть `0`.
+Expected: the sum for each currency should be `0`.
 
-## Разделение по аудиториям
+## Audience Guide
 
-### Для пользователей Openbill
+### For Openbill Users
 
 - Start here: [docs/getting-started.md](docs/getting-started.md)
-- Use cases (by industries): [docs/examples/README.md](docs/examples/README.md)
-- Запуск всех examples: `./test-examples.sh`
+- Use cases (by industry): [docs/examples/README.md](docs/examples/README.md)
+- Run all examples: `./test-examples.sh`
 
-### Для разработчиков openbill-core
+### For openbill-core Developers
 
-- Руководство разработчика: [DEVELOPMENT.md](DEVELOPMENT.md)
+- Developer guide: [DEVELOPMENT.md](DEVELOPMENT.md)
 
-## Смежные проекты
+## Related Projects
 
 - https://github.com/openbill-service
 
