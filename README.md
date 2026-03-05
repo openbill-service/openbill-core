@@ -158,16 +158,16 @@ SELECT SUM(amount_value) FROM openbill_accounts;
 
 - Developer guide: [DEVELOPMENT.md](DEVELOPMENT.md)
 
-## Benchmark Snapshot (2026-03-04)
+## Benchmark
 
-Test setup: PostgreSQL 17.4, `pgbench -M prepared`, `16 clients`, `4 threads`, warmup `5s`, measure `15s`.
+Test setup: PostgreSQL 17.4, `16 clients`, `4 threads`, warmup `5s`, measure `15s`.
 Benchmark server: Linux 6.8, Intel Core i7-2600K (8 vCPU), 31 GiB RAM.
 
 | Scenario | Meaning | TPS |
 |---|---|---:|
-| Mass transactions (`account_pool`) | Random transfers across a pool of 200 accounts (closest to high-volume traffic) | 2074.320544 |
-| Balance hold/unhold flow (`hold_cycle`) | Complex flow: `transfer -> hold -> transfer -> unhold -> transfer` | 68.129177 |
-| Contention stress (`hot_pair`) | Transfers only between two hot accounts under high concurrency | 339.196934 |
+| Mass transactions | Random transfers across a pool of 200 accounts (closest to high-volume traffic) | 2074 |
+| Balance hold/unhold flow | Complex flow: `transfer -> hold -> transfer -> unhold -> transfer` | 68 |
+| Contention stress | Transfers only between two hot accounts under high concurrency | 339 |
 
 Invariant check after benchmark:
 `sum(amount_value) + sum(hold_value) = 0.000000000000000000`
