@@ -1,11 +1,9 @@
-# Openbill Core (SQL scheme, functions and triggers)
+#O penbill Core is a pure-PostgreSQL billing engine.
 
 [![CI Functional](https://github.com/openbill-service/openbill-core/actions/workflows/github-actions-func.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions/workflows/github-actions-func.yml)
 [![CI Multithread](https://github.com/openbill-service/openbill-core/actions/workflows/github-action-multithread.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions/workflows/github-action-multithread.yml)
 [![SQL Style](https://github.com/openbill-service/openbill-core/actions/workflows/sql-style.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions/workflows/sql-style.yml)
 [![Docs Pages](https://github.com/openbill-service/openbill-core/actions/workflows/docs-pages.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions/workflows/docs-pages.yml)
-
-Openbill Core is a pure-PostgreSQL billing engine.
 
 The project implements financial accounting at the database level (accounts, transfers, policies, holds) and enforces invariants through functions and triggers.
 
