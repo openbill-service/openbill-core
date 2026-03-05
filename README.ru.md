@@ -32,6 +32,10 @@ Openbill Core реализует финансовый учёт напрямую 
 
 Для ядра больше ничего не требуется: ни отдельный API-сервис, ни SDK, ни дополнительный рантайм.
 
+### Почему не тип `money`?
+
+В PostgreSQL есть встроенный тип `money`, но Openbill использует `numeric(36,18)`: тип `money` привязан к локали (`lc_monetary`), не хранит код валюты и теряет точность при делении. `numeric` не зависит от локали, поддерживает произвольную точность и является стандартом для ledger-систем.
+
 ## Преимущества
 
 - Языко-независимая интеграция для любого стека с SQL-доступом.
@@ -81,31 +85,21 @@ INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'Nikolas');
 -- 2) Проверяем балансы до перевода
 SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
 -- Пример вывода:
---  id |     amount_value      | amount_currency
--- ----+-----------------------+----------------
---   1 | 0.000000000000000000  | USD
---   2 | 0.000000000000000000  | USD
+--  id | amount_value | amount_currency
+-- ----+--------------+----------------
+--   1 |         0.00 | USD
+--   2 |         0.00 | USD
 
 -- 3) Регистрируем перевод
-INSERT INTO openbill_transfers
-VALUES
-(
-  2,
-  1,
-  500,
-  'USD',
-  'payment:demo:1',
-  'Demo payment'
-)
-RETURNING id, from_account_id, to_account_id, amount_value, amount_currency;
+INSERT INTO openbill_transfers VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment')
 
 -- 4) Проверяем балансы после перевода
 SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
 -- Пример вывода:
---  id |      amount_value      | amount_currency
--- ----+------------------------+----------------
---   1 | 500.000000000000000000 | USD
---   2 | -500.000000000000000000 | USD
+--  id | amount_value | amount_currency
+-- ----+--------------+----------------
+--   1 |       500.00 | USD
+--   2 |      -500.00 | USD
 ```
 
 Почему баланс меняется автоматически: `INSERT` в `openbill_transfers` запускает функцию БД `process_account_transfer`, которая списывает сумму с `from_account_id` и зачисляет на `to_account_id`.

@@ -32,6 +32,10 @@ Only one dependency:
 
 Nothing else is required for the core: no separate API service, SDK, or extra runtime.
 
+### Why not the `money` type?
+
+PostgreSQL has a built-in `money` type, but Openbill uses `numeric(36,18)` instead because `money` is locale-dependent (`lc_monetary`), has no currency field, and loses precision on division. `numeric` is locale-safe, supports arbitrary precision, and is the standard choice for ledger systems.
+
 ## Advantages
 
 - Language-agnostic integration for any stack with SQL access.
@@ -81,31 +85,21 @@ INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'Nikolas');
 -- 2) Check balances before transfer
 SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
 -- Example output:
---  id |     amount_value      | amount_currency
--- ----+-----------------------+----------------
---   1 | 0.000000000000000000  | USD
---   2 | 0.000000000000000000  | USD
+--  id | amount_value | amount_currency
+-- ----+--------------+----------------
+--   1 |         0.00 | USD
+--   2 |         0.00 | USD
 
 -- 3) Register a transfer
-INSERT INTO openbill_transfers
-VALUES
-(
-  2,
-  1,
-  500,
-  'USD',
-  'payment:demo:1',
-  'Demo payment'
-)
-RETURNING id, from_account_id, to_account_id, amount_value, amount_currency;
+INSERT INTO openbill_transfers VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment')
 
 -- 4) Check balances after transfer
 SELECT id, amount_value, amount_currency FROM openbill_accounts ORDER BY id;
 -- Example output:
---  id |      amount_value      | amount_currency
--- ----+------------------------+----------------
---   1 | 500.000000000000000000 | USD
---   2 | -500.000000000000000000 | USD
+--  id | amount_value | amount_currency
+-- ----+--------------+----------------
+--   1 |       500.00 | USD
+--   2 |      -500.00 | USD
 ```
 
 Why balances changed automatically: `INSERT` into `openbill_transfers` triggers database function `process_account_transfer`, which debits `from_account_id` and credits `to_account_id`.
