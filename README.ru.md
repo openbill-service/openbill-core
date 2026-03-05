@@ -1,28 +1,91 @@
-# Openbill Core (SQL scheme, functions and triggers)
+# Openbill Core
+
+SQL-ядро биллинга на PostgreSQL с инвариантами на уровне базы данных для счетов, переводов, политик и холдов.
+
+English version: [README.md](README.md)
 
 [![CI Functional](https://github.com/openbill-service/openbill-core/actions/workflows/github-actions-func.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions/workflows/github-actions-func.yml)
 [![CI Multithread](https://github.com/openbill-service/openbill-core/actions/workflows/github-action-multithread.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions/workflows/github-action-multithread.yml)
 [![SQL Style](https://github.com/openbill-service/openbill-core/actions/workflows/sql-style.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions/workflows/sql-style.yml)
 [![Docs Pages](https://github.com/openbill-service/openbill-core/actions/workflows/docs-pages.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions/workflows/docs-pages.yml)
 
-Openbill Core — SQL-ядро биллинга на PostgreSQL.
+## Что Это
 
-Проект реализует учёт движения денег на уровне базы данных (счета, переводы, политики, холды) и защищает инварианты через функции и триггеры.
+Openbill Core реализует финансовый учёт напрямую в PostgreSQL.
 
-## Документация
+- Операции ledger выполняются обычным SQL (`INSERT`/`SELECT`)
+- Проверки корректности обеспечиваются ограничениями, функциями и триггерами
+- В ядре нет обязательного отдельного API-слоя
 
-- Сайт документации: https://openbill-service.github.io/openbill-core/
-- Быстрый старт для пользователей: https://openbill-service.github.io/openbill-core/getting-started/
-- Каталог сценариев (`categories` + `policies`): https://openbill-service.github.io/openbill-core/use-cases/
-- Производительность:
-  - https://openbill-service.github.io/openbill-core/benchmark_transfers_design/
-  - https://openbill-service.github.io/openbill-core/pgbench_benchmark_report_2026-03-04/
+## Базовые Принципы
 
-## Отраслевые примеры
+1. **Ledger в PostgreSQL**: переводы создаются и валидируются в SQL.
+2. **Инварианты в БД**: правила корректности живут рядом с данными.
+3. **Минимум инфраструктуры**: меньше движущихся частей и точек отказа.
 
-Полный каталог:
+## Преимущества
 
-- [Examples Catalog](docs/examples/README.md)
+- Языко-независимая интеграция для любого стека с SQL-доступом.
+- Детерминированное поведение: проверки идут в той же консистентной границе, что и запись.
+- Прозрачная трассировка операций через таблицы ledger.
+
+## Быстрый Старт (Для Пользователей)
+
+Требования:
+
+- PostgreSQL 13+
+
+Инициализация тестовой БД:
+
+```shell
+./tests/create.sh
+```
+
+Минимальный сценарий:
+
+```sql
+-- 1) Создаём два счёта и перевод между ними
+WITH user_wallet AS (
+  INSERT INTO openbill_accounts (category_id, details)
+  VALUES (-1, 'User wallet (readme)')
+  RETURNING id
+),
+system_income AS (
+  INSERT INTO openbill_accounts (category_id, details)
+  VALUES (-1, 'System income (readme)')
+  RETURNING id
+)
+INSERT INTO openbill_transfers
+  (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
+SELECT
+  si.id,
+  uw.id,
+  500,
+  'USD',
+  'payment:demo:1',
+  'Demo payment'
+FROM user_wallet uw, system_income si
+RETURNING id, from_account_id, to_account_id, amount_value, amount_currency;
+
+-- 2) Проверяем балансы после перевода
+SELECT id, details, amount_value, amount_currency
+FROM openbill_accounts
+WHERE details IN ('User wallet (readme)', 'System income (readme)')
+ORDER BY id;
+
+-- 3) Проверяем инвариант
+SELECT amount_currency, SUM(amount_value)
+FROM openbill_accounts
+GROUP BY amount_currency;
+```
+
+Ожидаемый результат: сумма по каждой валюте равна `0`.
+
+Почему баланс меняется автоматически: `INSERT` в `openbill_transfers` запускает функцию БД `process_account_transfer`, которая списывает сумму с `from_account_id` и зачисляет на `to_account_id`.
+
+Почему `category_id = -1`: в миграциях создаётся дефолтная категория `System` с `id = -1` для быстрого старта. В production обычно создают свои доменные категории и policy.
+
+## Отраслевые Примеры
 
 Примеры по отраслям:
 
@@ -48,78 +111,52 @@ Openbill Core — SQL-ядро биллинга на PostgreSQL.
 - [Telecom Prepaid](docs/examples/telecom-prepaid/README.md)
 - [Loyalty Bonuses](docs/examples/loyalty-bonuses/README.md)
 
-## Краткая концепция
+## Документация
 
-Openbill строится вокруг трёх базовых идей:
+- Индекс документации: [docs/index.md](docs/index.md)
+- Быстрый старт: [docs/getting-started.md](docs/getting-started.md)
+- Обзор сущностей: [docs/entities/index.md](docs/entities/index.md)
 
-1. **Ledger в PostgreSQL**: операции проводятся обычными SQL-запросами.
-2. **Инварианты в БД**: корректность обеспечивается триггерами и ограничениями, а не только кодом приложения.
-3. **Минимум инфраструктуры**: без отдельного API-слоя в ядре.
+## Краткий Отчёт По Бенчмаркам (2026-03-04)
 
-## Ключевые сущности
+Параметры теста: PostgreSQL 17.4, `pgbench -M prepared`, `16 clients`, `4 threads`, warmup `5s`, измерение `15s`.
+Сервер замеров: Linux 6.8, Intel Core i7-2600K (8 vCPU), 31 GiB RAM.
 
-- `openbill_accounts` — счета и остатки.
-- `openbill_transfers` — операции перемещения между счетами.
-- `openbill_holds` — временная блокировка средств.
-- `openbill_categories` — категории счетов.
-- `openbill_policies` — разрешённые маршруты переводов.
+| Сценарий | Что это значит | TPS |
+|---|---|---:|
+| Массовые транзакции (`account_pool`) | Случайные переводы между пулом из 200 счетов (ближе всего к потоку массовых операций) | 2074.320544 |
+| Удержание/разблокировка баланса (`hold_cycle`) | Сложный цикл: `transfer -> hold -> transfer -> unhold -> transfer` | 68.129177 |
+| Узкое место по блокировкам (`hot_pair`) | Переводы только между двумя \"горячими\" счетами при высокой конкуренции | 339.196934 |
 
-## Преимущества подхода
+Проверка инварианта после прогона:
+`sum(amount_value) + sum(hold_value) = 0.000000000000000000`
 
-- Языко-независимая интеграция: любой стек, умеющий SQL.
-- Детеминированное поведение: проверки проводятся на уровне БД.
-- Простой операционный контур: меньше сервисов и точек отказа.
-- Прозрачная трассировка финансовых операций через таблицы ledger.
+## Ключевые Сущности
 
-## Быстрый старт (для пользователей проекта)
+- [`openbill_accounts`](docs/entities/accounts.md) - счета и балансы
+- [`openbill_transfers`](docs/entities/transfers.md) - перемещение средств между счетами
+- [`openbill_holds`](docs/glossary.md#hold) - временная блокировка средств
+- [`openbill_categories`](docs/entities/categories.md) - категории счетов
+- [`openbill_policies`](docs/entities/policy.md) - разрешённые маршруты переводов
 
-Требования:
+## Разделение По Аудиториям
 
-- PostgreSQL 13+
+### Для Пользователей Openbill
 
-Инициализация тестовой БД:
+- Старт: [docs/getting-started.md](docs/getting-started.md)
+- Справочник по сущностям: [docs/entities/index.md](docs/entities/index.md)
+- Каталог сценариев: [docs/examples/README.md](docs/examples/README.md)
+- Запуск всех примеров: `./test-examples.sh`
 
-```shell
-./tests/create.sh
-```
-
-Минимальный сценарий:
-
-```sql
--- 1) Создаём два счёта
-INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'User wallet');
-INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'System income');
-
--- 2) Регистрируем перевод
-INSERT INTO openbill_transfers
-  (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
-VALUES
-  (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment');
-
--- 3) Проверяем инвариант системы
-SELECT amount_currency, SUM(amount_value)
-FROM openbill_accounts
-GROUP BY amount_currency;
-```
-
-Ожидаемо: сумма по каждой валюте должна быть `0`.
-
-## Разделение по аудиториям
-
-### Для пользователей Openbill
-
-- Start here: [docs/getting-started.md](docs/getting-started.md)
-- Use cases (by industries): [docs/examples/README.md](docs/examples/README.md)
-- Запуск всех examples: `./test-examples.sh`
-
-### Для разработчиков openbill-core
+### Contributins
 
 - Руководство разработчика: [DEVELOPMENT.md](DEVELOPMENT.md)
 
-## Смежные проекты
+## Смежные Проекты
 
 - https://github.com/openbill-service
+- https://github.com/openbill-service/openbill-admin
 
-## License
+## Лицензия
 
 [Apache License 2.0](LICENSE)

@@ -2,6 +2,8 @@
 
 Pure-PostgreSQL billing engine with database-level invariants for accounts, transfers, policies, and holds.
 
+Русская версия: [README.ru.md](README.ru.md)
+
 [![CI Functional](https://github.com/openbill-service/openbill-core/actions/workflows/github-actions-func.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions/workflows/github-actions-func.yml)
 [![CI Multithread](https://github.com/openbill-service/openbill-core/actions/workflows/github-action-multithread.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions/workflows/github-action-multithread.yml)
 [![SQL Style](https://github.com/openbill-service/openbill-core/actions/workflows/sql-style.yml/badge.svg)](https://github.com/openbill-service/openbill-core/actions/workflows/sql-style.yml)
@@ -42,15 +44,34 @@ Initialize the test database:
 Minimal scenario:
 
 ```sql
--- 1) Create two accounts
-INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'User wallet');
-INSERT INTO openbill_accounts (category_id, details) VALUES (-1, 'System income');
-
--- 2) Register a transfer
+-- 1) Create two accounts and transfer between them
+WITH user_wallet AS (
+  INSERT INTO openbill_accounts (category_id, details)
+  VALUES (-1, 'User wallet (readme)')
+  RETURNING id
+),
+system_income AS (
+  INSERT INTO openbill_accounts (category_id, details)
+  VALUES (-1, 'System income (readme)')
+  RETURNING id
+)
 INSERT INTO openbill_transfers
   (from_account_id, to_account_id, amount_value, amount_currency, idempotency_key, details)
-VALUES
-  (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment');
+SELECT
+  si.id,
+  uw.id,
+  500,
+  'USD',
+  'payment:demo:1',
+  'Demo payment'
+FROM user_wallet uw, system_income si
+RETURNING id, from_account_id, to_account_id, amount_value, amount_currency;
+
+-- 2) Check account balances after transfer
+SELECT id, details, amount_value, amount_currency
+FROM openbill_accounts
+WHERE details IN ('User wallet (readme)', 'System income (readme)')
+ORDER BY id;
 
 -- 3) Verify the invariant
 SELECT amount_currency, SUM(amount_value)
@@ -60,41 +81,11 @@ GROUP BY amount_currency;
 
 Expected result: sum by each currency is `0`.
 
-## Documentation
+Why balances changed automatically: `INSERT` into `openbill_transfers` triggers database function `process_account_transfer`, which debits `from_account_id` and credits `to_account_id`.
 
-- Documentation site: https://openbill-service.github.io/openbill-core/
-- Quick start: https://openbill-service.github.io/openbill-core/getting-started/
-- Entities overview: https://openbill-service.github.io/openbill-core/entities/
-- Performance:
-  - https://openbill-service.github.io/openbill-core/benchmark_transfers_design/
-  - https://openbill-service.github.io/openbill-core/pgbench_benchmark_report_2026-03-04/
-
-## Key Entities
-
-- [`openbill_accounts`](docs/entities/accounts.md) - accounts and balances
-- [`openbill_transfers`](docs/entities/transfers.md) - fund movement between accounts
-- [`openbill_holds`](docs/glossary.md#hold) - temporary fund locks
-- [`openbill_categories`](docs/entities/categories.md) - account categories
-- [`openbill_policies`](docs/entities/policy.md) - allowed transfer routes
-
-## Audience Guide
-
-### For Openbill Users
-
-- Start here: [docs/getting-started.md](docs/getting-started.md)
-- Entities reference: [docs/entities/index.md](docs/entities/index.md)
-- Use-case catalog: [docs/examples/README.md](docs/examples/README.md)
-- Run all examples: `./test-examples.sh`
-
-### For openbill-core Developers
-
-- Developer guide: [DEVELOPMENT.md](DEVELOPMENT.md)
+Why `category_id = -1`: migrations create default category `System` with `id = -1` for quick start. In production, create domain-specific categories and policies.
 
 ## Industry Examples
-
-Full catalog:
-
-- [Examples Catalog](docs/examples/README.md)
 
 Examples by industry:
 
@@ -120,9 +111,51 @@ Examples by industry:
 - [Telecom Prepaid](docs/examples/telecom-prepaid/README.md)
 - [Loyalty Bonuses](docs/examples/loyalty-bonuses/README.md)
 
+## Documentation
+
+- Documentation index: [docs/index.md](docs/index.md)
+- Quick start: [docs/getting-started.md](docs/getting-started.md)
+- Entities overview: [docs/entities/index.md](docs/entities/index.md)
+
+## Benchmark Snapshot (2026-03-04)
+
+Test setup: PostgreSQL 17.4, `pgbench -M prepared`, `16 clients`, `4 threads`, warmup `5s`, measure `15s`.
+Benchmark server: Linux 6.8, Intel Core i7-2600K (8 vCPU), 31 GiB RAM.
+
+| Scenario | Meaning | TPS |
+|---|---|---:|
+| Mass transactions (`account_pool`) | Random transfers across a pool of 200 accounts (closest to high-volume traffic) | 2074.320544 |
+| Balance hold/unhold flow (`hold_cycle`) | Complex flow: `transfer -> hold -> transfer -> unhold -> transfer` | 68.129177 |
+| Contention stress (`hot_pair`) | Transfers only between two hot accounts under high concurrency | 339.196934 |
+
+Invariant check after benchmark:
+`sum(amount_value) + sum(hold_value) = 0.000000000000000000`
+
+## Key Entities
+
+- [`openbill_accounts`](docs/entities/accounts.md) - accounts and balances
+- [`openbill_transfers`](docs/entities/transfers.md) - fund movement between accounts
+- [`openbill_holds`](docs/glossary.md#hold) - temporary fund locks
+- [`openbill_categories`](docs/entities/categories.md) - account categories
+- [`openbill_policies`](docs/entities/policy.md) - allowed transfer routes
+
+## Audience Guide
+
+### For Openbill Users
+
+- Start here: [docs/getting-started.md](docs/getting-started.md)
+- Entities reference: [docs/entities/index.md](docs/entities/index.md)
+- Use-case catalog: [docs/examples/README.md](docs/examples/README.md)
+- Run all examples: `./test-examples.sh`
+
+### Contributins
+
+- Developer guide: [DEVELOPMENT.md](DEVELOPMENT.md)
+
 ## Related Projects
 
 - https://github.com/openbill-service
+- https://github.com/openbill-service/openbill-admin
 
 ## License
 
