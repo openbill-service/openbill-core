@@ -91,6 +91,7 @@ SELECT details, amount_value, amount_currency FROM openbill_accounts;
 
 -- 3) Регистрируем перевод
 INSERT INTO openbill_transfers VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment')
+-- Автообработка: process_account_transfer списывает со счёта 2 и зачисляет на 1 (двойная запись).
 
 -- 4) Проверяем балансы после перевода
 SELECT details, amount_value, amount_currency FROM openbill_accounts;
@@ -99,9 +100,6 @@ SELECT details, amount_value, amount_currency FROM openbill_accounts;
 -- Bob     |       500.00 | USD
 -- Nikolas |      -500.00 | USD
 ```
-
-Почему баланс меняется автоматически: `INSERT` в `openbill_transfers` запускает функцию БД `process_account_transfer`, которая списывает сумму с `from_account_id` и зачисляет на `to_account_id`.
-Каждый transfer работает по принципу двойной записи: одно списание и одно зачисление на одну и ту же сумму.
 
 ## Отраслевые Примеры
 

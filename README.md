@@ -91,6 +91,7 @@ SELECT details, amount_value, amount_currency FROM openbill_accounts;
 
 -- 3) Register a transfer
 INSERT INTO openbill_transfers VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment')
+-- Automatic processing: process_account_transfer debits 2 and credits 1 (double-entry).
 
 -- 4) Check balances after transfer
 SELECT details, amount_value, amount_currency FROM openbill_accounts;
@@ -99,9 +100,6 @@ SELECT details, amount_value, amount_currency FROM openbill_accounts;
 -- Bob     |       500.00 | USD
 -- Nikolas |      -500.00 | USD
 ```
-
-Why balances changed automatically: `INSERT` into `openbill_transfers` triggers database function `process_account_transfer`, which debits `from_account_id` and credits `to_account_id`.
-Each transfer is double-entry: one debit and one credit for the same amount.
 
 ## Industry Examples
 
