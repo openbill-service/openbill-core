@@ -29,6 +29,7 @@ Openbill Core implements financial accounting directly in PostgreSQL.
 - Language-agnostic integration for any stack with SQL access.
 - Deterministic behavior: checks run at the same consistency boundary as writes.
 - Transparent traceability through ledger tables.
+- Applications connect directly to PostgreSQL where the core is implemented, without a separate API layer, which reduces integration overhead and support costs.
 
 ## Invariants
 
