@@ -101,12 +101,12 @@ SELECT details, amount_value, amount_currency FROM openbill_accounts;
 -- Bob     |       500.00 | USD
 -- Nikolas |      -500.00 | USD
 
--- Integrity check: total balance must remain 0.00, so money cannot appear or disappear.
 -- 5) Verify integrity (sum of all balances is zero)
 SELECT SUM(amount_value) FROM openbill_accounts;
 -- sum
 -- ------
 --  0.00
+-- Integrity check: 0.00 confirms money cannot appear or disappear.
 ```
 
 ## Industry Examples
