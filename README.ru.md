@@ -91,7 +91,8 @@ SELECT details, balance, currency FROM openbill_accounts;
 -- Nikolas |         0.00 | USD
 
 -- 3) Регистрируем перевод
-INSERT INTO openbill_transfers VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment')
+INSERT INTO openbill_transfers (from_account_id, to_account_id, amount, currency, idempotency_key, details)
+VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment');
 -- Автообработка: process_account_transfer списывает 500 USD с Nikolas и зачисляет 500 USD на Bob (двойная запись).
 
 -- 4) Проверяем балансы после перевода
@@ -165,9 +166,9 @@ SELECT SUM(balance) FROM openbill_accounts;
 
 | Сценарий | Что это значит | TPS |
 |---|---|---:|
-| Массовые транзакции (`account_pool`) | Случайные переводы между пулом из 200 счетов (ближе всего к потоку массовых операций) | 2074.320544 |
-| Удержание/разблокировка баланса (`hold_cycle`) | Сложный цикл: `transfer -> hold -> transfer -> unhold -> transfer` | 68.129177 |
-| Узкое место по блокировкам (`hot_pair`) | Переводы только между двумя \"горячими\" счетами при высокой конкуренции | 339.196934 |
+| Массовые транзакции (`account_pool`) | Случайные переводы между пулом из 200 счетов (ближе всего к потоку массовых операций) | 2074 |
+| Удержание/разблокировка баланса (`hold_cycle`) | Сложный цикл: `transfer -> hold -> transfer -> unhold -> transfer` | 68 |
+| Узкое место по блокировкам (`hot_pair`) | Переводы только между двумя \"горячими\" счетами при высокой конкуренции | 339 |
 
 Проверка инварианта после прогона:
 `sum(balance) + sum(hold_amount) = 0.000000000000000000`

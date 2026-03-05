@@ -91,7 +91,8 @@ SELECT details, balance, currency FROM openbill_accounts;
 -- Nikolas |         0.00 | USD
 
 -- 3) Register a transfer
-INSERT INTO openbill_transfers VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment')
+INSERT INTO openbill_transfers (from_account_id, to_account_id, amount, currency, idempotency_key, details)
+VALUES (2, 1, 500, 'USD', 'payment:demo:1', 'Demo payment');
 -- Automatic processing: process_account_transfer debits 500 USD from Nikolas and credits 500 USD to Bob (double-entry).
 
 -- 4) Check balances after transfer
